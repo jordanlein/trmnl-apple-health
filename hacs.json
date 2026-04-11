@@ -1,0 +1,9 @@
+{
+  "name": "TRMNL Apple Health Bridge",
+  "content_in_root": false,
+  "domains": [
+    "trmnl_health_bridge"
+  ],
+  "homeassistant": "2024.12.0",
+  "render_readme": true
+}

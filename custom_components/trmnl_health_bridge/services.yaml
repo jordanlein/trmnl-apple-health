@@ -1,0 +1,8 @@
+sync_now:
+  name: Sync now
+  description: Immediately push the currently selected Apple Health snapshot to TRMNL.
+  fields:
+    entry_id:
+      required: false
+      selector:
+        text:

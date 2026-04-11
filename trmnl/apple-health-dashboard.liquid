@@ -1,0 +1,54 @@
+<div class="screen">
+  <div class="view view--full">
+    <div class="layout layout--col">
+      <div class="columns">
+        <div class="column">
+          <span class="label">Move</span>
+          <div class="content">
+            <span class="title">{{ rings.move | default: 0 | round }} / {{ rings.move_goal | default: 0 | round }}</span>
+            <span class="label label--underline">{{ rings.move_percent | default: 0 | round }}%</span>
+          </div>
+        </div>
+        <div class="column">
+          <span class="label">Exercise</span>
+          <div class="content">
+            <span class="title">{{ rings.exercise | default: 0 | round }} / {{ rings.exercise_goal | default: 0 | round }}</span>
+            <span class="label label--underline">{{ rings.exercise_percent | default: 0 | round }}%</span>
+          </div>
+        </div>
+        <div class="column">
+          <span class="label">Stand</span>
+          <div class="content">
+            <span class="title">{{ rings.stand | default: 0 | round }} / {{ rings.stand_goal | default: 0 | round }}</span>
+            <span class="label label--underline">{{ rings.stand_percent | default: 0 | round }}%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="columns">
+        <div class="column">
+          <span class="label">Steps</span>
+          <span class="title">{{ activity.steps | default: 0 }}</span>
+        </div>
+        <div class="column">
+          <span class="label">Distance</span>
+          <span class="title">{{ activity.distance_mi | default: 0 | round: 1 }} mi</span>
+        </div>
+        <div class="column">
+          <span class="label">Flights</span>
+          <span class="title">{{ activity.flights_climbed | default: 0 }}</span>
+        </div>
+      </div>
+
+      <div class="markdown">
+        <span class="label">{{ date_label | default: "Today" }}</span>
+        <span class="label">{{ captured_at | default: "" }}</span>
+      </div>
+    </div>
+
+    <div class="title_bar">
+      <span class="title">{{ profile_name | default: "Apple Health" }}</span>
+      <span class="instance">{{ device_name | default: "iPhone" }}</span>
+    </div>
+  </div>
+</div>

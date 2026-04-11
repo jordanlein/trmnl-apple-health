@@ -1,0 +1,36 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "TRMNL Health Bridge",
+        "description": "Link one Home Assistant Apple Health snapshot sensor to one TRMNL Private Plugin webhook.",
+        "data": {
+          "name": "Name",
+          "snapshot_entity_id": "Health snapshot sensor",
+          "trmnl_webhook_url": "TRMNL webhook URL",
+          "subscription_tier": "TRMNL tier",
+          "debounce_seconds": "Debounce seconds"
+        }
+      }
+    },
+    "error": {
+      "invalid_url": "Enter a valid HTTP or HTTPS URL."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "TRMNL Health Bridge",
+        "data": {
+          "snapshot_entity_id": "Health snapshot sensor",
+          "trmnl_webhook_url": "TRMNL webhook URL",
+          "subscription_tier": "TRMNL tier",
+          "debounce_seconds": "Debounce seconds"
+        }
+      }
+    },
+    "error": {
+      "invalid_url": "Enter a valid HTTP or HTTPS URL."
+    }
+  }
+}
