@@ -13,7 +13,7 @@ from homeassistant.core import HomeAssistant, ServiceCall
 from .const import DOMAIN, SERVICE_SYNC_NOW
 from .manager import TRMNLHealthBridgeManager
 
-type ManagerMap = dict[str, TRMNLHealthBridgeManager]
+ManagerMap = dict[str, TRMNLHealthBridgeManager]
 
 SERVICE_SCHEMA = vol.Schema(
     {

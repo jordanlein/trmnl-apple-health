@@ -77,52 +77,8 @@ class TRMNLHealthBridgeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="user",
-            data_schema=self._schema(user_input),
+            data_schema=_build_schema(user_input),
             errors=errors,
-        )
-
-    def _schema(self, user_input: Mapping[str, object] | None) -> vol.Schema:
-        defaults = user_input or {}
-        return vol.Schema(
-            {
-                vol.Required(
-                    CONF_NAME, default=defaults.get(CONF_NAME, DEFAULT_NAME)
-                ): str,
-                vol.Required(
-                    CONF_SNAPSHOT_ENTITY_ID,
-                    default=defaults.get(CONF_SNAPSHOT_ENTITY_ID, ""),
-                ): selector.EntitySelector(
-                    selector.EntitySelectorConfig(domain="sensor")
-                ),
-                vol.Required(
-                    CONF_TRMNL_WEBHOOK_URL,
-                    default=defaults.get(CONF_TRMNL_WEBHOOK_URL, ""),
-                ): str,
-                vol.Required(
-                    CONF_SUBSCRIPTION_TIER,
-                    default=defaults.get(
-                        CONF_SUBSCRIPTION_TIER, DEFAULT_SUBSCRIPTION_TIER
-                    ),
-                ): selector.SelectSelector(
-                    selector.SelectSelectorConfig(
-                        options=list(SUBSCRIPTION_TIERS),
-                        mode=selector.SelectSelectorMode.DROPDOWN,
-                    )
-                ),
-                vol.Required(
-                    CONF_DEBOUNCE_SECONDS,
-                    default=defaults.get(
-                        CONF_DEBOUNCE_SECONDS, DEFAULT_DEBOUNCE_SECONDS
-                    ),
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(
-                        min=15,
-                        max=1800,
-                        mode=selector.NumberSelectorMode.BOX,
-                        step=15,
-                    )
-                ),
-            }
         )
 
 
@@ -161,6 +117,52 @@ class TRMNLHealthBridgeOptionsFlow(config_entries.OptionsFlow):
         current = {**self.config_entry.data, **self.config_entry.options}
         return self.async_show_form(
             step_id="init",
-            data_schema=TRMNLHealthBridgeConfigFlow._schema(self, current),
+            data_schema=_build_schema(current),
             errors=errors,
         )
+
+
+def _build_schema(user_input: Mapping[str, object] | None) -> vol.Schema:
+    """Build a shared form schema for config and options flows."""
+    defaults = user_input or {}
+    return vol.Schema(
+        {
+            vol.Required(
+                CONF_NAME, default=defaults.get(CONF_NAME, DEFAULT_NAME)
+            ): str,
+            vol.Required(
+                CONF_SNAPSHOT_ENTITY_ID,
+                default=defaults.get(CONF_SNAPSHOT_ENTITY_ID, ""),
+            ): selector.EntitySelector(
+                selector.EntitySelectorConfig(domain="sensor")
+            ),
+            vol.Required(
+                CONF_TRMNL_WEBHOOK_URL,
+                default=defaults.get(CONF_TRMNL_WEBHOOK_URL, ""),
+            ): str,
+            vol.Required(
+                CONF_SUBSCRIPTION_TIER,
+                default=defaults.get(
+                    CONF_SUBSCRIPTION_TIER, DEFAULT_SUBSCRIPTION_TIER
+                ),
+            ): selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    options=list(SUBSCRIPTION_TIERS),
+                    mode=selector.SelectSelectorMode.DROPDOWN,
+                )
+            ),
+            vol.Required(
+                CONF_DEBOUNCE_SECONDS,
+                default=defaults.get(
+                    CONF_DEBOUNCE_SECONDS, DEFAULT_DEBOUNCE_SECONDS
+                ),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=15,
+                    max=1800,
+                    mode=selector.NumberSelectorMode.BOX,
+                    step=15,
+                )
+            ),
+        }
+    )
