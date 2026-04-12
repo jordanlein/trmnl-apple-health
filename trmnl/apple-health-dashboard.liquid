@@ -1,54 +1,351 @@
+{% assign move_percent_raw = rings.move_percent | default: 0 | plus: 0 %}
+{% assign exercise_percent_raw = rings.exercise_percent | default: 0 | plus: 0 %}
+{% assign stand_percent_raw = rings.stand_percent | default: 0 | plus: 0 %}
+
+{% assign move_progress = move_percent_raw %}
+{% if move_progress < 0 %}{% assign move_progress = 0 %}{% endif %}
+{% if move_progress > 100 %}{% assign move_progress = 100 %}{% endif %}
+{% assign move_overflow = 0 %}
+{% if move_percent_raw > 100 %}{% assign move_overflow = move_percent_raw | minus: 100 %}{% endif %}
+{% if move_overflow > 100 %}{% assign move_overflow = 100 %}{% endif %}
+
+{% assign exercise_progress = exercise_percent_raw %}
+{% if exercise_progress < 0 %}{% assign exercise_progress = 0 %}{% endif %}
+{% if exercise_progress > 100 %}{% assign exercise_progress = 100 %}{% endif %}
+{% assign exercise_overflow = 0 %}
+{% if exercise_percent_raw > 100 %}{% assign exercise_overflow = exercise_percent_raw | minus: 100 %}{% endif %}
+{% if exercise_overflow > 100 %}{% assign exercise_overflow = 100 %}{% endif %}
+
+{% assign stand_progress = stand_percent_raw %}
+{% if stand_progress < 0 %}{% assign stand_progress = 0 %}{% endif %}
+{% if stand_progress > 100 %}{% assign stand_progress = 100 %}{% endif %}
+{% assign stand_overflow = 0 %}
+{% if stand_percent_raw > 100 %}{% assign stand_overflow = stand_percent_raw | minus: 100 %}{% endif %}
+{% if stand_overflow > 100 %}{% assign stand_overflow = 100 %}{% endif %}
+
+{% assign move_remaining = 100 | minus: move_progress %}
+{% assign move_overflow_remaining = 100 | minus: move_overflow %}
+{% assign exercise_remaining = 100 | minus: exercise_progress %}
+{% assign exercise_overflow_remaining = 100 | minus: exercise_overflow %}
+{% assign stand_remaining = 100 | minus: stand_progress %}
+{% assign stand_overflow_remaining = 100 | minus: stand_overflow %}
+
+{% assign move_offset = 465 | times: move_remaining | divided_by: 100 %}
+{% assign move_overflow_offset = 415 | times: move_overflow_remaining | divided_by: 100 %}
+{% assign exercise_offset = 320 | times: exercise_remaining | divided_by: 100 %}
+{% assign exercise_overflow_offset = 282 | times: exercise_overflow_remaining | divided_by: 100 %}
+{% assign stand_offset = 176 | times: stand_remaining | divided_by: 100 %}
+{% assign stand_overflow_offset = 145 | times: stand_overflow_remaining | divided_by: 100 %}
+
+<style>
+  .health-screen {
+    height: 100%;
+    padding: 22px 22px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    background: #f3f3ef;
+    color: #111;
+  }
+
+  .health-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .health-header__eyebrow {
+    display: block;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #5f5f5f;
+    margin-bottom: 4px;
+  }
+
+  .health-header__title {
+    display: block;
+    font-size: 34px;
+    line-height: 1;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .health-header__date,
+  .health-header__device {
+    display: block;
+    font-size: 16px;
+    line-height: 1.2;
+    color: #5f5f5f;
+  }
+
+  .health-card {
+    background: #ffffff;
+    border: 1px solid #d8d8d2;
+    border-radius: 22px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  }
+
+  .health-hero {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 18px 20px;
+    display: grid;
+    grid-template-columns: 270px 1fr;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .health-rings {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .health-rings svg {
+    width: 220px;
+    height: 220px;
+  }
+
+  .ring-track {
+    fill: none;
+    stroke: #e5e5df;
+  }
+
+  .ring-progress {
+    fill: none;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: 120px 120px;
+  }
+
+  .ring-progress--move {
+    stroke: #111111;
+  }
+
+  .ring-progress--exercise {
+    stroke: #4b4b4b;
+  }
+
+  .ring-progress--stand {
+    stroke: #7a7a7a;
+  }
+
+  .ring-overflow {
+    fill: none;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: 120px 120px;
+  }
+
+  .ring-overflow--move {
+    stroke: #434343;
+  }
+
+  .ring-overflow--exercise {
+    stroke: #747474;
+  }
+
+  .ring-overflow--stand {
+    stroke: #9c9c9c;
+  }
+
+  .ring-center {
+    font-size: 14px;
+    fill: #666;
+    text-anchor: middle;
+  }
+
+  .ring-center__value {
+    font-size: 34px;
+    font-weight: 700;
+    fill: #111;
+  }
+
+  .health-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .health-stat {
+    display: grid;
+    grid-template-columns: 84px 1fr auto;
+    gap: 10px;
+    align-items: baseline;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #ecece8;
+  }
+
+  .health-stat:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .health-stat__label {
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #707070;
+  }
+
+  .health-stat__value {
+    font-size: 28px;
+    line-height: 1;
+    font-weight: 700;
+    color: #111;
+  }
+
+  .health-stat__goal {
+    font-size: 16px;
+    color: #666;
+  }
+
+  .health-stat__badge {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111;
+    background: #efefea;
+    border: 1px solid #ddddd7;
+    border-radius: 999px;
+    padding: 4px 9px 3px;
+  }
+
+  .health-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .health-metric {
+    padding: 16px 18px 14px;
+    min-height: 102px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .health-metric__label {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #6a6a6a;
+  }
+
+  .health-metric__value {
+    font-size: 34px;
+    line-height: 1;
+    font-weight: 700;
+    color: #111;
+  }
+
+  .health-metric__detail {
+    font-size: 14px;
+    color: #666;
+  }
+
+  .health-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: #6c6c6c;
+    padding: 0 4px;
+  }
+</style>
+
 <div class="screen">
   <div class="view view--full">
-    <div class="layout layout--col">
-      <div class="columns">
-        <div class="column">
-          <span class="label">Move</span>
-          <div class="content">
-            <span class="title">{{ rings.move | default: 0 | round }} / {{ rings.move_goal | default: 0 | round }}</span>
-            <span class="label label--underline">{{ rings.move_percent | default: 0 | round }}%</span>
-          </div>
+    <div class="health-screen">
+      <div class="health-header">
+        <div>
+          <span class="health-header__eyebrow">Apple Health</span>
+          <span class="health-header__title">Activity Summary</span>
+          <span class="health-header__date">{{ date_label | default: "Today" }}</span>
         </div>
-        <div class="column">
-          <span class="label">Exercise</span>
-          <div class="content">
-            <span class="title">{{ rings.exercise | default: 0 | round }} / {{ rings.exercise_goal | default: 0 | round }}</span>
-            <span class="label label--underline">{{ rings.exercise_percent | default: 0 | round }}%</span>
-          </div>
+        <div>
+          <span class="health-header__device">{{ device_name | default: "iPhone" }}</span>
+          <span class="health-header__device">{{ captured_at | default: "" }}</span>
         </div>
-        <div class="column">
-          <span class="label">Stand</span>
-          <div class="content">
-            <span class="title">{{ rings.stand | default: 0 | round }} / {{ rings.stand_goal | default: 0 | round }}</span>
-            <span class="label label--underline">{{ rings.stand_percent | default: 0 | round }}%</span>
+      </div>
+
+      <div class="health-card health-hero">
+        <div class="health-rings">
+          <svg viewBox="0 0 240 240" role="img" aria-label="Apple Health activity rings">
+            <circle class="ring-track" cx="120" cy="120" r="74" stroke-width="22"></circle>
+            <circle class="ring-track" cx="120" cy="120" r="51" stroke-width="22"></circle>
+            <circle class="ring-track" cx="120" cy="120" r="28" stroke-width="18"></circle>
+
+            <circle class="ring-progress ring-progress--move" cx="120" cy="120" r="74" stroke-width="22" stroke-dasharray="465" stroke-dashoffset="{{ move_offset }}"></circle>
+            {% if move_overflow > 0 %}
+              <circle class="ring-overflow ring-overflow--move" cx="120" cy="120" r="66" stroke-width="8" stroke-dasharray="415" stroke-dashoffset="{{ move_overflow_offset }}"></circle>
+            {% endif %}
+
+            <circle class="ring-progress ring-progress--exercise" cx="120" cy="120" r="51" stroke-width="22" stroke-dasharray="320" stroke-dashoffset="{{ exercise_offset }}"></circle>
+            {% if exercise_overflow > 0 %}
+              <circle class="ring-overflow ring-overflow--exercise" cx="120" cy="120" r="45" stroke-width="8" stroke-dasharray="282" stroke-dashoffset="{{ exercise_overflow_offset }}"></circle>
+            {% endif %}
+
+            <circle class="ring-progress ring-progress--stand" cx="120" cy="120" r="28" stroke-width="18" stroke-dasharray="176" stroke-dashoffset="{{ stand_offset }}"></circle>
+            {% if stand_overflow > 0 %}
+              <circle class="ring-overflow ring-overflow--stand" cx="120" cy="120" r="23" stroke-width="6" stroke-dasharray="145" stroke-dashoffset="{{ stand_overflow_offset }}"></circle>
+            {% endif %}
+
+            <text class="ring-center" x="120" y="112">Rings</text>
+            <text class="ring-center ring-center__value" x="120" y="146">{{ activity.steps | default: 0 }}</text>
+            <text class="ring-center" x="120" y="166">steps</text>
+          </svg>
+        </div>
+
+        <div class="health-stats">
+          <div class="health-stat">
+            <span class="health-stat__label">Move</span>
+            <span class="health-stat__value">{{ rings.move | default: 0 | round }} CAL</span>
+            <span class="health-stat__badge">{{ rings.move_percent | default: 0 | round }}%</span>
+            <span class="health-stat__goal">goal {{ rings.move_goal | default: 0 | round }} CAL</span>
+          </div>
+
+          <div class="health-stat">
+            <span class="health-stat__label">Exercise</span>
+            <span class="health-stat__value">{{ rings.exercise | default: 0 | round }} MIN</span>
+            <span class="health-stat__badge">{{ rings.exercise_percent | default: 0 | round }}%</span>
+            <span class="health-stat__goal">goal {{ rings.exercise_goal | default: 0 | round }} MIN</span>
+          </div>
+
+          <div class="health-stat">
+            <span class="health-stat__label">Stand</span>
+            <span class="health-stat__value">{{ rings.stand | default: 0 | round }} HRS</span>
+            <span class="health-stat__badge">{{ rings.stand_percent | default: 0 | round }}%</span>
+            <span class="health-stat__goal">goal {{ rings.stand_goal | default: 0 | round }} HRS</span>
           </div>
         </div>
       </div>
 
-      <div class="columns">
-        <div class="column">
-          <span class="label">Steps</span>
-          <span class="title">{{ activity.steps | default: 0 }}</span>
+      <div class="health-grid">
+        <div class="health-card health-metric">
+          <span class="health-metric__label">Step Count</span>
+          <span class="health-metric__value">{{ activity.steps | default: 0 }}</span>
+          <span class="health-metric__detail">today</span>
         </div>
-        <div class="column">
-          <span class="label">Distance</span>
-          <span class="title">{{ activity.distance_mi | default: 0 | round: 1 }} mi</span>
+
+        <div class="health-card health-metric">
+          <span class="health-metric__label">Distance</span>
+          <span class="health-metric__value">{{ activity.distance_mi | default: 0 | round: 2 }}<span class="suffix"> MI</span></span>
+          <span class="health-metric__detail">{{ activity.distance_km | default: 0 | round: 2 }} km</span>
         </div>
-        <div class="column">
-          <span class="label">Flights</span>
-          <span class="title">{{ activity.flights_climbed | default: 0 }}</span>
+
+        <div class="health-card health-metric">
+          <span class="health-metric__label">Flights</span>
+          <span class="health-metric__value">{{ activity.flights_climbed | default: 0 }}</span>
+          <span class="health-metric__detail">floors climbed</span>
         </div>
       </div>
 
-      <div class="markdown">
-        <span class="label">{{ date_label | default: "Today" }}</span>
-        <span class="label">{{ captured_at | default: "" }}</span>
+      <div class="health-footer">
+        <span>{{ profile_name | default: "Apple Health" }}</span>
+        <span>monochrome ring view for TRMNL</span>
       </div>
-    </div>
-
-    <div class="title_bar">
-      <span class="title">{{ profile_name | default: "Apple Health" }}</span>
-      <span class="instance">{{ device_name | default: "iPhone" }}</span>
     </div>
   </div>
 </div>
