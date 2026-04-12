@@ -35,7 +35,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     managers[entry.entry_id] = manager
     await manager.async_start()
 
-    if not hass.services.async_has_service(DOMAIN, SERVICE_SYNC_NOW):
+    if not hass.services.has_service(DOMAIN, SERVICE_SYNC_NOW):
         hass.services.async_register(
             DOMAIN,
             SERVICE_SYNC_NOW,
@@ -53,7 +53,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     manager = managers.pop(entry.entry_id)
     await manager.async_stop()
 
-    if not managers and hass.services.async_has_service(DOMAIN, SERVICE_SYNC_NOW):
+    if not managers and hass.services.has_service(DOMAIN, SERVICE_SYNC_NOW):
         hass.services.async_remove(DOMAIN, SERVICE_SYNC_NOW)
 
     return True

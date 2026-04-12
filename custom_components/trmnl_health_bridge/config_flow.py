@@ -86,7 +86,7 @@ class TRMNLHealthBridgeOptionsFlow(config_entries.OptionsFlow):
     """Handle options for TRMNL Health Bridge."""
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
-        self.config_entry = config_entry
+        self._config_entry = config_entry
 
     async def async_step_init(
         self, user_input: Mapping[str, object] | None = None
@@ -101,6 +101,7 @@ class TRMNLHealthBridgeOptionsFlow(config_entries.OptionsFlow):
                 return self.async_create_entry(
                     title="",
                     data={
+                        CONF_NAME: str(user_input[CONF_NAME]).strip() or DEFAULT_NAME,
                         CONF_SNAPSHOT_ENTITY_ID: str(
                             user_input[CONF_SNAPSHOT_ENTITY_ID]
                         ).strip(),
@@ -114,7 +115,7 @@ class TRMNLHealthBridgeOptionsFlow(config_entries.OptionsFlow):
                     },
                 )
 
-        current = {**self.config_entry.data, **self.config_entry.options}
+        current = {**self._config_entry.data, **self._config_entry.options}
         return self.async_show_form(
             step_id="init",
             data_schema=_build_schema(current),

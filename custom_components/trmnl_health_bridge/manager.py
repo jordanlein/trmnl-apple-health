@@ -75,6 +75,7 @@ class TRMNLHealthBridgeManager:
         self._push_lock = asyncio.Lock()
         self._last_push_at: datetime | None = None
         self._last_payload_hash: str | None = None
+        self._pending_reason: str | None = None
 
     async def async_start(self) -> None:
         """Start listening for state changes."""
@@ -100,6 +101,7 @@ class TRMNLHealthBridgeManager:
             self._unsub_debounce()
             self._unsub_debounce = None
 
+        self._pending_reason = reason
         delay = 0 if immediate else self._calculate_delay_seconds()
         _LOGGER.debug(
             "Scheduling TRMNL push for %s in %ss because %s",
@@ -110,7 +112,7 @@ class TRMNLHealthBridgeManager:
         self._unsub_debounce = async_call_later(
             self.hass,
             delay,
-            lambda _: self.hass.async_create_task(self.async_push_now(reason)),
+            self._handle_debounced_push,
         )
 
     async def async_push_now(self, reason: str = "manual") -> bool:
@@ -123,6 +125,10 @@ class TRMNLHealthBridgeManager:
                     self.context.snapshot_entity_id,
                     self.context.entry_id,
                 )
+                if reason != "manual":
+                    self.hass.async_create_task(
+                        self.async_request_push("snapshot_unavailable_retry")
+                    )
                 return False
 
             payload = self._build_payload(state.state, dict(state.attributes))
@@ -180,6 +186,14 @@ class TRMNLHealthBridgeManager:
     def _handle_snapshot_event(self, event: Event) -> None:
         """React to Home Assistant state changes."""
         self.hass.async_create_task(self.async_request_push("snapshot_changed"))
+
+    @callback
+    def _handle_debounced_push(self, _: datetime) -> None:
+        """Execute a previously scheduled push on the event loop."""
+        self._unsub_debounce = None
+        reason = self._pending_reason or "scheduled"
+        self._pending_reason = None
+        self.hass.async_create_task(self.async_push_now(reason))
 
     def _calculate_delay_seconds(self) -> int:
         """Compute the next allowable push window."""
