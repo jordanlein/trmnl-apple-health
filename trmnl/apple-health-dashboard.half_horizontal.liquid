@@ -26,26 +26,26 @@
   <table width="100%" cellpadding="0" cellspacing="0">
     <tr>
       <td valign="top">
-        <h1>Activity Rings</h1>
+        <strong>Activity Rings</strong>
         <div>{{ date_label | default: "Today" }}</div>
       </td>
-      <td align="right" valign="top"></td>
+      <td align="right" valign="top">
+        <strong>{{ activity.steps | default: 0 }}</strong> steps
+      </td>
     </tr>
   </table>
 
   <div class="outline rounded">
-    <table width="100%" cellpadding="12" cellspacing="0">
+    <table width="100%" cellpadding="10" cellspacing="0">
       <tr>
-        <td width="220" align="center" valign="middle">
-          <svg width="196" height="196" viewBox="0 0 240 240" role="img" aria-label="Apple Health activity rings">
+        <td width="130" align="center" valign="middle">
+          <svg width="116" height="116" viewBox="0 0 240 240" role="img" aria-label="Apple Health activity rings">
             <circle cx="120" cy="120" r="81" fill="none" stroke="#f1f1eb" stroke-width="24"></circle>
             <circle cx="120" cy="120" r="57" fill="none" stroke="#f1f1eb" stroke-width="24"></circle>
             <circle cx="120" cy="120" r="33" fill="none" stroke="#f1f1eb" stroke-width="22"></circle>
-
             <circle cx="120" cy="120" r="81" fill="none" stroke="#d9d9d2" stroke-width="16"></circle>
             <circle cx="120" cy="120" r="57" fill="none" stroke="#d9d9d2" stroke-width="16"></circle>
             <circle cx="120" cy="120" r="33" fill="none" stroke="#d9d9d2" stroke-width="14"></circle>
-
             <circle cx="120" cy="120" r="81" fill="none" stroke="#111111" stroke-width="16" stroke-linecap="round" stroke-dasharray="509" stroke-dashoffset="{{ move_offset }}" transform="rotate(-90 120 120)"></circle>
             <circle cx="120" cy="120" r="57" fill="none" stroke="#535353" stroke-width="16" stroke-linecap="round" stroke-dasharray="358" stroke-dashoffset="{{ exercise_offset }}" transform="rotate(-90 120 120)"></circle>
             <circle cx="120" cy="120" r="33" fill="none" stroke="#8f8f8f" stroke-width="14" stroke-linecap="round" stroke-dasharray="207" stroke-dashoffset="{{ stand_offset }}" transform="rotate(-90 120 120)"></circle>
@@ -54,40 +54,25 @@
         <td valign="middle">
           <table width="100%" cellpadding="0" cellspacing="0">
             <tr>
-              <td valign="top">
-                <div><strong>Move</strong></div>
-                <div><strong>{{ rings.move | default: 0 }}</strong> CAL</div>
-                <div>Goal {{ rings.move_goal | default: 0 }} CAL</div>
-              </td>
-              <td align="right" valign="top">
-                <strong>{{ move_percent_raw }}%</strong>
-              </td>
+              <td>Move</td>
+              <td align="right"><strong>{{ rings.move | default: 0 }}</strong> CAL</td>
+              <td align="right"><strong>{{ move_percent_raw }}%</strong></td>
             </tr>
             <tr>
-              <td colspan="2"><hr></td>
+              <td colspan="3"><hr></td>
             </tr>
             <tr>
-              <td valign="top">
-                <div><strong>Exercise</strong></div>
-                <div><strong>{{ rings.exercise | default: 0 }}</strong> MIN</div>
-                <div>Goal {{ rings.exercise_goal | default: 0 }} MIN</div>
-              </td>
-              <td align="right" valign="top">
-                <strong>{{ exercise_percent_raw }}%</strong>
-              </td>
+              <td>Exercise</td>
+              <td align="right"><strong>{{ rings.exercise | default: 0 }}</strong> MIN</td>
+              <td align="right"><strong>{{ exercise_percent_raw }}%</strong></td>
             </tr>
             <tr>
-              <td colspan="2"><hr></td>
+              <td colspan="3"><hr></td>
             </tr>
             <tr>
-              <td valign="top">
-                <div><strong>Stand</strong></div>
-                <div><strong>{{ rings.stand | default: 0 }}</strong> HRS</div>
-                <div>Goal {{ rings.stand_goal | default: 0 }} HRS</div>
-              </td>
-              <td align="right" valign="top">
-                <strong>{{ stand_percent_raw }}%</strong>
-              </td>
+              <td>Stand</td>
+              <td align="right"><strong>{{ rings.stand | default: 0 }}</strong> HRS</td>
+              <td align="right"><strong>{{ stand_percent_raw }}%</strong></td>
             </tr>
           </table>
         </td>
@@ -95,53 +80,9 @@
     </table>
   </div>
 
-  <table width="100%" cellpadding="0" cellspacing="8">
-    <tr>
-      <td width="33.33%">
-        <div class="outline rounded">
-          <table width="100%" cellpadding="10" cellspacing="0">
-            <tr>
-              <td>
-                <div><strong>Steps</strong></div>
-                <div><strong>{{ activity.steps | default: 0 }}</strong></div>
-                <div>Today</div>
-              </td>
-            </tr>
-          </table>
-        </div>
-      </td>
-      <td width="33.33%">
-        <div class="outline rounded">
-          <table width="100%" cellpadding="10" cellspacing="0">
-            <tr>
-              <td>
-                <div><strong>Distance</strong></div>
-                <div><strong>{{ activity.distance_mi | default: 0 }}</strong> MI</div>
-                <div>{{ activity.distance_km | default: 0 }} km</div>
-              </td>
-            </tr>
-          </table>
-        </div>
-      </td>
-      <td width="33.33%">
-        <div class="outline rounded">
-          <table width="100%" cellpadding="10" cellspacing="0">
-            <tr>
-              <td>
-                <div><strong>Flights</strong></div>
-                <div><strong>{{ activity.flights_climbed | default: 0 }}</strong></div>
-                <div>Floors climbed</div>
-              </td>
-            </tr>
-          </table>
-        </div>
-      </td>
-    </tr>
-  </table>
-
   <table width="100%" cellpadding="0" cellspacing="0">
     <tr>
-      <td>{{ profile_name | default: "Apple Health" }}</td>
+      <td>{{ activity.distance_mi | default: 0 }} MI</td>
       <td align="right">
         {% if sync_time_label %}
           Updated {{ sync_time_label }}

@@ -13,6 +13,14 @@ Suggested TRMNL settings:
 - monochrome or 2-bit theme: whichever matches your device
 - instance name: `Apple Health`
 
+If you are submitting this to the TRMNL marketplace recipe publisher, map the repo files like this:
+
+- `trmnl/apple-health-dashboard.fields.yaml` -> Custom Fields
+- `trmnl/apple-health-dashboard.liquid` -> full layout
+- `trmnl/apple-health-dashboard.half_horizontal.liquid` -> half_horizontal layout
+- `trmnl/apple-health-dashboard.half_vertical.liquid` -> half_vertical layout
+- `trmnl/apple-health-dashboard.quadrant.liquid` -> quadrant layout
+
 ## 2. Choose your server path
 
 You can run this project in either of these modes:

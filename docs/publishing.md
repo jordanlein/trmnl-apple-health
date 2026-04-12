@@ -7,7 +7,8 @@ This repo is now structured around a self-hosted publication path instead of a v
 Implemented:
 
 - public GitHub repo structure
-- TRMNL Liquid markup
+- TRMNL Liquid markup for all four recipe view sizes
+- TRMNL recipe form fields with the required `author_bio` and `copyable_webhook_url` treatments
 - setup docs for Home Assistant and standalone server
 
 Manual work still required:
@@ -15,6 +16,18 @@ Manual work still required:
 - final README polish
 - screenshots for the marketplace listing
 - TRMNL marketplace submission itself
+
+## TRMNL recipe publisher bundle
+
+Use these files when filling out the TRMNL publisher:
+
+- `trmnl/apple-health-dashboard.fields.yaml` for the Custom Fields YAML
+- `trmnl/apple-health-dashboard.liquid` for the `full` layout
+- `trmnl/apple-health-dashboard.half_horizontal.liquid` for the `half_horizontal` layout
+- `trmnl/apple-health-dashboard.half_vertical.liquid` for the `half_vertical` layout
+- `trmnl/apple-health-dashboard.quadrant.liquid` for the `quadrant` layout
+
+The markup intentionally avoids TRMNL's auto-applied `full`, `half_horizontal`, `half_vertical`, and `quadrant` wrapper classes, and uses framework layout classes plus SVG attributes instead of a large custom CSS block.
 
 ## Phase 2: Regular self-hosted path
 

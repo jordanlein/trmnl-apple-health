@@ -53,7 +53,7 @@ App Store link: coming soon
 - `ios/TRMNLHealthSync/`
   iPhone app sources plus the Xcode project generator.
 - `trmnl/`
-  Ready-to-paste TRMNL plugin markup.
+  Ready-to-paste TRMNL plugin markup plus recipe-publisher assets for the four TRMNL view sizes and custom field YAML.
 - `docs/`
   Setup, architecture, privacy, and publishing notes.
 - `scripts/generate_ios_project.rb`
@@ -99,6 +99,14 @@ Suggested plugin settings:
 - Name: `Apple Health`
 - Refresh interval: `15 minutes`
 - Theme: a monochrome / e-ink-friendly option
+
+If you are publishing this in the TRMNL marketplace instead of using it only as a private plugin, also use:
+
+- `trmnl/apple-health-dashboard.fields.yaml` for the Custom Fields box
+- `trmnl/apple-health-dashboard.liquid` for the `full` layout markup
+- `trmnl/apple-health-dashboard.half_horizontal.liquid` for the `half_horizontal` layout markup
+- `trmnl/apple-health-dashboard.half_vertical.liquid` for the `half_vertical` layout markup
+- `trmnl/apple-health-dashboard.quadrant.liquid` for the `quadrant` layout markup
 
 ## 2. Pick your server mode
 

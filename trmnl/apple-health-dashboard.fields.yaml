@@ -1,0 +1,16 @@
+- keyname: about_this_plugin
+  field_type: author_bio
+  name: About This Plugin
+  category: personal,analytics
+  description: >
+    Mirror your Apple Health activity rings, steps, distance, and flights climbed on a TRMNL display.
+    Install the iPhone app, connect it to either Home Assistant or the standalone self-hosted bridge,
+    then paste the generated webhook URL into your chosen bridge during setup.
+  github_url: https://github.com/jordanlein/trmnl-apple-health
+  learn_more_url: https://github.com/jordanlein/trmnl-apple-health#readme
+
+- keyname: webhook_url
+  field_type: copyable_webhook_url
+  name: Webhook URL
+  description: Paste this into the Home Assistant bridge or the standalone self-hosted bridge.
+  help_text: This value appears after the plugin is first saved.
