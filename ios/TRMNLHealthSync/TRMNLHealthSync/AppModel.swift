@@ -3,8 +3,12 @@ import Combine
 
 @MainActor
 final class AppModel: ObservableObject {
+    @Published var syncDestinationInput: SyncDestination
     @Published var instanceURLInput: String
     @Published var accessTokenInput: String
+    @Published var bridgeURLInput: String
+    @Published var bridgeSetupTokenInput: String
+    @Published var trmnlWebhookURLInput: String
     @Published var deviceNameInput: String
     @Published var lastSnapshot: HealthSnapshot?
     @Published var statusMessage = "Ready"
@@ -14,6 +18,7 @@ final class AppModel: ObservableObject {
     private var configuration: AppConfiguration
     private let healthKitStore = HealthKitStore()
     private let homeAssistantClient = HomeAssistantClient()
+    private let selfHostedBridgeClient = SelfHostedBridgeClient()
     private var observersInstalled = false
     private let defaultsKey = "TRMNLHealthSync.configuration"
     private var hasRegisteredSensors = false
@@ -21,8 +26,12 @@ final class AppModel: ObservableObject {
     init() {
         let loaded = Self.loadConfiguration(defaultsKey: defaultsKey)
         configuration = loaded
+        syncDestinationInput = loaded.syncDestination
         instanceURLInput = loaded.instanceURLString
-        accessTokenInput = KeychainStore.loadAccessToken() ?? ""
+        accessTokenInput = KeychainStore.load(.homeAssistantAccessToken) ?? ""
+        bridgeURLInput = loaded.bridgeURLString
+        bridgeSetupTokenInput = KeychainStore.load(.selfHostedSetupToken) ?? ""
+        trmnlWebhookURLInput = loaded.trmnlWebhookURLString
         deviceNameInput = loaded.deviceName
     }
 
@@ -30,7 +39,7 @@ final class AppModel: ObservableObject {
         guard !didFinishInitialLoad else { return }
         didFinishInitialLoad = true
 
-        guard configuration.registration != nil || !instanceURLInput.isEmpty else {
+        guard hasSavedRegistration else {
             return
         }
 
@@ -44,7 +53,7 @@ final class AppModel: ObservableObject {
     }
 
     func handleSceneBecameActive() async {
-        guard configuration.registration != nil else { return }
+        guard hasSavedRegistration else { return }
         do {
             try await syncNow(reason: "foreground")
         } catch {
@@ -57,29 +66,15 @@ final class AppModel: ObservableObject {
         defer { isBusy = false }
 
         do {
-            guard let instanceURL = instanceURLInput.normalizedURL else {
-                throw AppModelError.invalidInstanceURL
-            }
-            let accessToken = accessTokenInput.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !accessToken.isEmpty else {
-                throw AppModelError.missingAccessToken
-            }
-
             try await healthKitStore.requestAuthorization()
-
-            let registration = try await homeAssistantClient.register(
-                instanceURL: instanceURL,
-                accessToken: accessToken,
-                deviceName: deviceNameInput
-            )
-
-            configuration.instanceURLString = instanceURL.absoluteString
-            configuration.deviceName = deviceNameInput
-            configuration.registration = registration
-            try save(accessToken: accessToken)
+            switch syncDestinationInput {
+            case .homeAssistant:
+                try await connectHomeAssistant()
+            case .selfHostedBridge:
+                try await connectSelfHostedBridge()
+            }
 
             installObserversIfNeeded()
-            hasRegisteredSensors = false
             try await syncNow(reason: "setup")
             statusMessage = "Connected and synced."
         } catch {
@@ -93,7 +88,6 @@ final class AppModel: ObservableObject {
 
         do {
             try await syncNow(reason: "manual")
-            statusMessage = "Synced successfully."
         } catch {
             statusMessage = error.localizedDescription
         }
@@ -101,13 +95,17 @@ final class AppModel: ObservableObject {
 
     func resetConfiguration() {
         configuration = AppConfiguration()
+        syncDestinationInput = .homeAssistant
         instanceURLInput = ""
         accessTokenInput = ""
+        bridgeURLInput = ""
+        bridgeSetupTokenInput = ""
+        trmnlWebhookURLInput = ""
         deviceNameInput = DeviceIdentity.defaultDeviceName
         lastSnapshot = nil
         hasRegisteredSensors = false
         observersInstalled = false
-        KeychainStore.clearAccessToken()
+        KeychainStore.clearAll()
         UserDefaults.standard.removeObject(forKey: defaultsKey)
         statusMessage = "Cleared local configuration."
     }
@@ -121,29 +119,63 @@ final class AppModel: ObservableObject {
     }
 
     private func syncNow(reason: String) async throws {
-        guard configuration.registration != nil else {
-            throw AppModelError.missingRegistration
-        }
-
         let snapshot = try await healthKitStore.fetchDailySnapshot(deviceName: deviceNameInput)
         lastSnapshot = snapshot
 
-        if !hasRegisteredSensors {
-            try await homeAssistantClient.registerSensors(
+        switch configuration.syncDestination {
+        case .homeAssistant:
+            guard configuration.registration != nil else {
+                throw AppModelError.missingRegistration
+            }
+
+            if !hasRegisteredSensors {
+                try await homeAssistantClient.registerSensors(
+                    configuration: configuration,
+                    snapshot: snapshot
+                )
+                hasRegisteredSensors = true
+            }
+
+            try await homeAssistantClient.updateSensors(
                 configuration: configuration,
                 snapshot: snapshot
             )
-            hasRegisteredSensors = true
+
+        case .selfHostedBridge:
+            guard
+                configuration.bridgeRegistration != nil,
+                let bridgeURL = configuration.bridgeURL
+            else {
+                throw AppModelError.missingBridgeRegistration
+            }
+            guard
+                let deviceToken = KeychainStore.load(.selfHostedDeviceToken),
+                !deviceToken.isEmpty
+            else {
+                throw AppModelError.missingBridgeRegistration
+            }
+
+            let result = try await selfHostedBridgeClient.updateSnapshot(
+                serverURL: bridgeURL,
+                deviceToken: deviceToken,
+                snapshot: snapshot,
+                trmnlWebhookURL: configuration.trmnlWebhookURLString
+            )
+
+            if result.trmnlWebhookConfigured {
+                statusMessage = result.pushedToTRMNL
+                    ? "Last sync: \(snapshot.capturedAt.formatted(date: .omitted, time: .shortened)) (\(reason), pushed)"
+                    : "Last sync: \(snapshot.capturedAt.formatted(date: .omitted, time: .shortened)) (\(reason), stored)"
+            } else {
+                statusMessage = "Last sync: \(snapshot.capturedAt.formatted(date: .omitted, time: .shortened)) (\(reason), webhook not configured)"
+            }
         }
 
-        try await homeAssistantClient.updateSensors(
-            configuration: configuration,
-            snapshot: snapshot
-        )
-
         configuration.lastSuccessfulSync = .now
-        try save(accessToken: accessTokenInput)
-        statusMessage = "Last sync: \(snapshot.capturedAt.formatted(date: .omitted, time: .shortened)) (\(reason))"
+        try saveConfiguration()
+        if configuration.syncDestination == .homeAssistant {
+            statusMessage = "Last sync: \(snapshot.capturedAt.formatted(date: .omitted, time: .shortened)) (\(reason))"
+        }
     }
 
     private func installObserversIfNeeded() {
@@ -154,8 +186,59 @@ final class AppModel: ObservableObject {
         }
     }
 
-    private func save(accessToken: String) throws {
-        try KeychainStore.saveAccessToken(accessToken)
+    private func connectHomeAssistant() async throws {
+        guard let instanceURL = instanceURLInput.normalizedURL else {
+            throw AppModelError.invalidInstanceURL
+        }
+        let accessToken = accessTokenInput.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !accessToken.isEmpty else {
+            throw AppModelError.missingAccessToken
+        }
+
+        let registration = try await homeAssistantClient.register(
+            instanceURL: instanceURL,
+            accessToken: accessToken,
+            deviceName: deviceNameInput
+        )
+
+        configuration.syncDestination = .homeAssistant
+        configuration.instanceURLString = instanceURL.absoluteString
+        configuration.deviceName = deviceNameInput
+        configuration.registration = registration
+        try KeychainStore.save(accessToken, for: .homeAssistantAccessToken)
+        try saveConfiguration()
+        hasRegisteredSensors = false
+    }
+
+    private func connectSelfHostedBridge() async throws {
+        guard let bridgeURL = bridgeURLInput.normalizedURL else {
+            throw AppModelError.invalidBridgeURL
+        }
+        let setupToken = bridgeSetupTokenInput.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !setupToken.isEmpty else {
+            throw AppModelError.missingBridgeSetupToken
+        }
+
+        let normalizedWebhook = trmnlWebhookURLInput.trimmingCharacters(in: .whitespacesAndNewlines)
+        let registration = try await selfHostedBridgeClient.register(
+            serverURL: bridgeURL,
+            setupToken: setupToken,
+            deviceName: deviceNameInput,
+            trmnlWebhookURL: normalizedWebhook.isEmpty ? nil : normalizedWebhook
+        )
+
+        configuration.syncDestination = .selfHostedBridge
+        configuration.bridgeURLString = bridgeURL.absoluteString
+        configuration.bridgeRegistration = registration.persistedRegistration
+        configuration.trmnlWebhookURLString = normalizedWebhook
+        configuration.deviceName = deviceNameInput
+        try KeychainStore.save(setupToken, for: .selfHostedSetupToken)
+        try KeychainStore.save(registration.deviceToken, for: .selfHostedDeviceToken)
+        try saveConfiguration()
+        hasRegisteredSensors = false
+    }
+
+    private func saveConfiguration() throws {
         let data = try JSONEncoder().encode(configuration)
         UserDefaults.standard.set(data, forKey: defaultsKey)
     }
@@ -168,5 +251,16 @@ final class AppModel: ObservableObject {
             return AppConfiguration()
         }
         return decoded
+    }
+
+    private var hasSavedRegistration: Bool {
+        switch configuration.syncDestination {
+        case .homeAssistant:
+            return configuration.registration != nil && configuration.instanceURL != nil
+        case .selfHostedBridge:
+            return configuration.bridgeRegistration != nil
+                && configuration.bridgeURL != nil
+                && KeychainStore.load(.selfHostedDeviceToken) != nil
+        }
     }
 }

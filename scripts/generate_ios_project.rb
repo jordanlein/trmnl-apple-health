@@ -53,7 +53,7 @@ target.build_configurations.each do |config|
   config.build_settings["DEVELOPMENT_TEAM"] = ""
   config.build_settings["GENERATE_INFOPLIST_FILE"] = "YES"
   config.build_settings["INFOPLIST_KEY_CFBundleDisplayName"] = "TRMNL Health Sync"
-  config.build_settings["INFOPLIST_KEY_NSHealthShareUsageDescription"] = "TRMNL Health Sync reads your Apple Health data to mirror your daily activity on TRMNL and Home Assistant."
+  config.build_settings["INFOPLIST_KEY_NSHealthShareUsageDescription"] = "TRMNL Health Sync reads your Apple Health data to mirror your daily activity on TRMNL through Home Assistant or your self-hosted bridge."
   config.build_settings["INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents"] = "YES"
   config.build_settings["INFOPLIST_KEY_UILaunchScreen_Generation"] = "YES"
   config.build_settings["INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone"] = [
@@ -64,7 +64,7 @@ target.build_configurations.each do |config|
     "$(inherited)",
     "@executable_path/Frameworks",
   ]
-  config.build_settings["MARKETING_VERSION"] = "0.1.0"
+  config.build_settings["MARKETING_VERSION"] = "0.2.0"
   config.build_settings["PRODUCT_BUNDLE_IDENTIFIER"] = "io.github.jordanleinberger.trmnlhealthsync"
   config.build_settings["PRODUCT_NAME"] = "$(TARGET_NAME)"
   config.build_settings["SUPPORTED_PLATFORMS"] = "iphoneos iphonesimulator"

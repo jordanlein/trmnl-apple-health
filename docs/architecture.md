@@ -2,12 +2,22 @@
 
 ## End-to-end flow
 
+### Home Assistant mode
+
 1. `TRMNLHealthSync` runs on iPhone, requests HealthKit read access, and computes a daily snapshot.
 2. The app registers itself with Home Assistant's native `mobile_app` API and receives a webhook identity.
 3. The app publishes one rich snapshot sensor plus a few human-readable metric sensors into Home Assistant.
 4. `trmnl_health_bridge` watches the configured snapshot sensor for changes.
 5. The Home Assistant integration coalesces updates, honors TRMNL webhook rate limits, and POSTs `merge_variables` to the TRMNL Private Plugin webhook URL.
 6. TRMNL renders the checked-in Liquid template using the latest merged variables.
+
+### Standalone self-hosted mode
+
+1. `TRMNLHealthSync` runs on iPhone, requests HealthKit read access, and computes a daily snapshot.
+2. The app pairs with the local bridge using a setup token and receives a device token.
+3. The app POSTs each new Health snapshot to the local bridge.
+4. The local bridge stores the latest snapshot in SQLite and pushes a normalized `merge_variables` payload to the configured TRMNL webhook.
+5. TRMNL renders the same checked-in Liquid template using the latest merged variables.
 
 ## Why this architecture
 
@@ -19,10 +29,10 @@ The provided TRMNL guide points to three main integration shapes:
 - Third-party OAuth plugin
 - Direct Display / Device APIs
 
-For a self-hosted Home Assistant install, a Private Plugin with webhook-backed `merge_variables` is the best fit:
+For a self-hosted install, a Private Plugin with webhook-backed `merge_variables` is the best fit:
 
 - it avoids building a public OAuth-backed TRMNL SaaS service
-- it avoids exposing Home Assistant to TRMNL polling traffic
+- it avoids exposing a home server to TRMNL polling traffic
 - only the latest rendered screen matters, which maps well to a debounced health snapshot
 
 ### Home Assistant side
@@ -37,19 +47,35 @@ That decision keeps the user path close to:
 
 An add-on can still be added later if you want stricter process isolation or a richer local preview service, but it is not required for the core bridge.
 
+### Standalone bridge side
+
+For users who do not want Home Assistant in the loop, the standalone bridge fills the same role:
+
+- receives Health snapshots from the iPhone app
+- stores the latest snapshot locally in SQLite
+- pushes directly to the TRMNL webhook
+- exposes a tiny local dashboard plus diagnostics endpoints
+
+This keeps the default privacy posture self-hosted instead of cloud-hosted.
+
 ### iOS side
 
-HealthKit data must be read on Apple hardware. Instead of inventing a custom internet-facing sync API, the app uses Home Assistant's native app registration flow:
+HealthKit data must be read on Apple hardware. The iPhone app now supports two outbound sync targets:
 
-- authenticated registration at `/api/mobile_app/registrations`
-- webhook-based sensor updates after registration
-- cloudhook / remote UI fallback if available
+- Home Assistant native app registration:
+  - authenticated registration at `/api/mobile_app/registrations`
+  - webhook-based sensor updates after registration
+  - cloudhook / remote UI fallback if available
+- standalone bridge registration:
+  - authenticated pairing at `/api/v1/devices/register`
+  - bearer-token snapshot updates at `/api/v1/snapshots`
 
 That gives us:
 
 - no custom auth server
-- no public Raspberry Pi ingress requirement
+- no public home-network ingress requirement
 - native Home Assistant entities that users can also reuse in dashboards and automations
+- a non-Home-Assistant local-server path for broader distribution
 
 ## HealthKit model
 
@@ -95,7 +121,7 @@ The iPhone app publishes a sensor with a state equal to the capture timestamp an
 
 ### TRMNL webhook contract
 
-The Home Assistant integration POSTs:
+The Home Assistant integration and standalone bridge both POST:
 
 ```json
 {
@@ -127,6 +153,17 @@ The Home Assistant integration POSTs:
 ```
 
 The Liquid template in `trmnl/` is written against that payload.
+
+## Publication posture
+
+The repo is designed for a tweaked phase-3 path:
+
+1. publish the TRMNL markup and setup docs
+2. support either Home Assistant or the standalone self-hosted bridge
+3. keep health data on infrastructure the user runs
+4. ship the iPhone app as a client that only sends data to a user-selected Home Assistant instance or self-hosted bridge
+
+That avoids the need for a vendor-hosted health-data SaaS while still leaving room for TRMNL marketplace submission and App Store review.
 
 ## Source links
 

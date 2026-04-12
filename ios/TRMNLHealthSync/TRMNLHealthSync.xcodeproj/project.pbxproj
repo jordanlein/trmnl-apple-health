@@ -7,107 +7,110 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		20BB84894A3A7FBC7EFEE9FD /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18FBF6E35F14E35180C69AC /* KeychainStore.swift */; };
-		59B124045C5FB054C6E19C7D /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ECC64C7D0A63048FB1522C1 /* AppModel.swift */; };
-		87DB3E4BF563BFE2B62DFF1B /* TRMNLHealthSyncApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0AA51D9EE1AD779FD5B338 /* TRMNLHealthSyncApp.swift */; };
-		8BFB123BF872920BAC16E2DF /* HealthKitStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5073F8A7D325406CB5AA0FD0 /* HealthKitStore.swift */; };
-		9879E34F8E75EBE4C5EA4FE0 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 391CA4F0874B30F17468A978 /* ContentView.swift */; };
-		9DC6926A55BA97111FA4C437 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9FCFA1D9D129BC56686A4A9 /* Foundation.framework */; };
-		A3C19E91DAF2FCF4A2A09DFF /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6982C6CACA23858C5ADC296 /* Security.framework */; };
-		A713C34422D147212CF3BBD9 /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4590B8BBA21B6A6EDF05AE4 /* HealthKit.framework */; };
-		E1AC2F6815126B4A071986B4 /* HomeAssistantClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68403E7E69B7190569F3A80B /* HomeAssistantClient.swift */; };
-		FFB86888A7BB70976A1049F9 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = D88B0D7BCBE9EC64CE5A3F9C /* Models.swift */; };
+		09296B66555573B35C0C1069 /* HomeAssistantClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3BD9B9DD4E68A95B781C9FC /* HomeAssistantClient.swift */; };
+		0F346163795E02DAD161C126 /* HealthKitStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19004A4A58614A5311550E91 /* HealthKitStore.swift */; };
+		4B66BFDD4E7A3A7F12D5F5B4 /* SelfHostedBridgeClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F802F1BED457F389A0F39C /* SelfHostedBridgeClient.swift */; };
+		787E984C208EE66A764B5B38 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAA523AC9C906358CD0832D6 /* KeychainStore.swift */; };
+		7EBDCF75D0980463B7EDA339 /* TRMNLHealthSyncApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C62222CFC53B7A6A816C099 /* TRMNLHealthSyncApp.swift */; };
+		8AF9DFDE6D7C8B76FAE7EB85 /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 531F91B2F051F0C3A400231A /* HealthKit.framework */; };
+		992B43F5B59DD4A9EC897F31 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 60B770642A08734AE476F918 /* Foundation.framework */; };
+		AE77B7270843789E2E335AA2 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3EA0B35E6027D6EAE93690A /* ContentView.swift */; };
+		C11C7A61BDEC5850CF2FDFA6 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A99348CF7EC9C51BC81DF763 /* AppModel.swift */; };
+		ED0B8331781B9004C44C1601 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF4D869EB984F641BECE128A /* Models.swift */; };
+		EF199C55DD1DEA5577D8540F /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B6A0C237AAFA55BA47FA7CB /* Security.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		149963D8E74A84EE01840D66 /* TRMNLHealthSync.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TRMNLHealthSync.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		391CA4F0874B30F17468A978 /* ContentView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ContentView.swift; path = TRMNLHealthSync/ContentView.swift; sourceTree = "<group>"; };
-		5073F8A7D325406CB5AA0FD0 /* HealthKitStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HealthKitStore.swift; path = TRMNLHealthSync/HealthKitStore.swift; sourceTree = "<group>"; };
-		5ECC64C7D0A63048FB1522C1 /* AppModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AppModel.swift; path = TRMNLHealthSync/AppModel.swift; sourceTree = "<group>"; };
-		68403E7E69B7190569F3A80B /* HomeAssistantClient.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HomeAssistantClient.swift; path = TRMNLHealthSync/HomeAssistantClient.swift; sourceTree = "<group>"; };
-		A6982C6CACA23858C5ADC296 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = "<group>"; };
-		B83B2AA3C480FCD422083A52 /* TRMNLHealthSync.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; name = TRMNLHealthSync.entitlements; path = TRMNLHealthSync/TRMNLHealthSync.entitlements; sourceTree = "<group>"; };
-		C18FBF6E35F14E35180C69AC /* KeychainStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = KeychainStore.swift; path = TRMNLHealthSync/KeychainStore.swift; sourceTree = "<group>"; };
-		C9FCFA1D9D129BC56686A4A9 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
-		D88B0D7BCBE9EC64CE5A3F9C /* Models.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Models.swift; path = TRMNLHealthSync/Models.swift; sourceTree = "<group>"; };
-		EE0AA51D9EE1AD779FD5B338 /* TRMNLHealthSyncApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TRMNLHealthSyncApp.swift; path = TRMNLHealthSync/TRMNLHealthSyncApp.swift; sourceTree = "<group>"; };
-		F4590B8BBA21B6A6EDF05AE4 /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = "<group>"; };
+		19004A4A58614A5311550E91 /* HealthKitStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HealthKitStore.swift; path = TRMNLHealthSync/HealthKitStore.swift; sourceTree = "<group>"; };
+		3EB4431C54E46826BE517088 /* TRMNLHealthSync.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; name = TRMNLHealthSync.entitlements; path = TRMNLHealthSync/TRMNLHealthSync.entitlements; sourceTree = "<group>"; };
+		4AF6BACBA979BAB6BBB3F3DF /* TRMNLHealthSync.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TRMNLHealthSync.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		52F802F1BED457F389A0F39C /* SelfHostedBridgeClient.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SelfHostedBridgeClient.swift; path = TRMNLHealthSync/SelfHostedBridgeClient.swift; sourceTree = "<group>"; };
+		531F91B2F051F0C3A400231A /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = "<group>"; };
+		5B6A0C237AAFA55BA47FA7CB /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = "<group>"; };
+		60B770642A08734AE476F918 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		6C62222CFC53B7A6A816C099 /* TRMNLHealthSyncApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TRMNLHealthSyncApp.swift; path = TRMNLHealthSync/TRMNLHealthSyncApp.swift; sourceTree = "<group>"; };
+		A3BD9B9DD4E68A95B781C9FC /* HomeAssistantClient.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HomeAssistantClient.swift; path = TRMNLHealthSync/HomeAssistantClient.swift; sourceTree = "<group>"; };
+		A99348CF7EC9C51BC81DF763 /* AppModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AppModel.swift; path = TRMNLHealthSync/AppModel.swift; sourceTree = "<group>"; };
+		BF4D869EB984F641BECE128A /* Models.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Models.swift; path = TRMNLHealthSync/Models.swift; sourceTree = "<group>"; };
+		CAA523AC9C906358CD0832D6 /* KeychainStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = KeychainStore.swift; path = TRMNLHealthSync/KeychainStore.swift; sourceTree = "<group>"; };
+		D3EA0B35E6027D6EAE93690A /* ContentView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ContentView.swift; path = TRMNLHealthSync/ContentView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		77D0C415491F3516F7457A6C /* Frameworks */ = {
+		99152866510178BB40EE85AC /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9DC6926A55BA97111FA4C437 /* Foundation.framework in Frameworks */,
-				A713C34422D147212CF3BBD9 /* HealthKit.framework in Frameworks */,
-				A3C19E91DAF2FCF4A2A09DFF /* Security.framework in Frameworks */,
+				992B43F5B59DD4A9EC897F31 /* Foundation.framework in Frameworks */,
+				8AF9DFDE6D7C8B76FAE7EB85 /* HealthKit.framework in Frameworks */,
+				EF199C55DD1DEA5577D8540F /* Security.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		1D6FB8555278CDB135EFBBA9 = {
+		107F1465A018EE7AEE78B21B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				D1B816BB688F47152C777CD3 /* Products */,
-				F20B0A0C1BB3CA97C2CBFF44 /* Frameworks */,
-				EBB3263DD124ECB016724D2C /* TRMNLHealthSync */,
-			);
-			sourceTree = "<group>";
-		};
-		D1B816BB688F47152C777CD3 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				149963D8E74A84EE01840D66 /* TRMNLHealthSync.app */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		EBB3263DD124ECB016724D2C /* TRMNLHealthSync */ = {
-			isa = PBXGroup;
-			children = (
-				5ECC64C7D0A63048FB1522C1 /* AppModel.swift */,
-				391CA4F0874B30F17468A978 /* ContentView.swift */,
-				5073F8A7D325406CB5AA0FD0 /* HealthKitStore.swift */,
-				68403E7E69B7190569F3A80B /* HomeAssistantClient.swift */,
-				C18FBF6E35F14E35180C69AC /* KeychainStore.swift */,
-				D88B0D7BCBE9EC64CE5A3F9C /* Models.swift */,
-				B83B2AA3C480FCD422083A52 /* TRMNLHealthSync.entitlements */,
-				EE0AA51D9EE1AD779FD5B338 /* TRMNLHealthSyncApp.swift */,
-			);
-			name = TRMNLHealthSync;
-			sourceTree = "<group>";
-		};
-		F20B0A0C1BB3CA97C2CBFF44 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				F7840C50320B577AE4C02BB4 /* iOS */,
-				F4590B8BBA21B6A6EDF05AE4 /* HealthKit.framework */,
-				A6982C6CACA23858C5ADC296 /* Security.framework */,
+				5D5A5E9FE9D913E48C04535D /* iOS */,
+				531F91B2F051F0C3A400231A /* HealthKit.framework */,
+				5B6A0C237AAFA55BA47FA7CB /* Security.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		F7840C50320B577AE4C02BB4 /* iOS */ = {
+		5D5A5E9FE9D913E48C04535D /* iOS */ = {
 			isa = PBXGroup;
 			children = (
-				C9FCFA1D9D129BC56686A4A9 /* Foundation.framework */,
+				60B770642A08734AE476F918 /* Foundation.framework */,
 			);
 			name = iOS;
+			sourceTree = "<group>";
+		};
+		891C24EAB6F35D2CA7C873C0 = {
+			isa = PBXGroup;
+			children = (
+				CCF05136D29BEDE2B4DD62B3 /* Products */,
+				107F1465A018EE7AEE78B21B /* Frameworks */,
+				F0AF2681881CCCB6E5CD5ADD /* TRMNLHealthSync */,
+			);
+			sourceTree = "<group>";
+		};
+		CCF05136D29BEDE2B4DD62B3 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				4AF6BACBA979BAB6BBB3F3DF /* TRMNLHealthSync.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F0AF2681881CCCB6E5CD5ADD /* TRMNLHealthSync */ = {
+			isa = PBXGroup;
+			children = (
+				A99348CF7EC9C51BC81DF763 /* AppModel.swift */,
+				D3EA0B35E6027D6EAE93690A /* ContentView.swift */,
+				19004A4A58614A5311550E91 /* HealthKitStore.swift */,
+				A3BD9B9DD4E68A95B781C9FC /* HomeAssistantClient.swift */,
+				CAA523AC9C906358CD0832D6 /* KeychainStore.swift */,
+				BF4D869EB984F641BECE128A /* Models.swift */,
+				52F802F1BED457F389A0F39C /* SelfHostedBridgeClient.swift */,
+				3EB4431C54E46826BE517088 /* TRMNLHealthSync.entitlements */,
+				6C62222CFC53B7A6A816C099 /* TRMNLHealthSyncApp.swift */,
+			);
+			name = TRMNLHealthSync;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		565281E0816CE7C15FAAE039 /* TRMNLHealthSync */ = {
+		2F0DE3266D97E9553A4A30E4 /* TRMNLHealthSync */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 83AF666C446078914DF4F8C4 /* Build configuration list for PBXNativeTarget "TRMNLHealthSync" */;
+			buildConfigurationList = CF248E69DF4216CCF0387D9B /* Build configuration list for PBXNativeTarget "TRMNLHealthSync" */;
 			buildPhases = (
-				0C15135E31EA925B2DAE9EC7 /* Sources */,
-				77D0C415491F3516F7457A6C /* Frameworks */,
-				F510C00AB955F49D34BC3D4D /* Resources */,
+				EB71635E989EC24CDDB1AFCF /* Sources */,
+				99152866510178BB40EE85AC /* Frameworks */,
+				8B4A8C8F97E6747A21DE8DB7 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -115,19 +118,19 @@
 			);
 			name = TRMNLHealthSync;
 			productName = TRMNLHealthSync;
-			productReference = 149963D8E74A84EE01840D66 /* TRMNLHealthSync.app */;
+			productReference = 4AF6BACBA979BAB6BBB3F3DF /* TRMNLHealthSync.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		19AAE56565285B9B7D9DD0CE /* Project object */ = {
+		1F28C7DFAF40F9B73AF021A8 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1600;
 				LastUpgradeCheck = 1650;
 			};
-			buildConfigurationList = AE13C0243227F41F06EA1603 /* Build configuration list for PBXProject "TRMNLHealthSync" */;
+			buildConfigurationList = 9F7EBEF6E93AEE2C05D052C1 /* Build configuration list for PBXProject "TRMNLHealthSync" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -135,20 +138,20 @@
 				en,
 				Base,
 			);
-			mainGroup = 1D6FB8555278CDB135EFBBA9;
+			mainGroup = 891C24EAB6F35D2CA7C873C0;
 			minimizedProjectReferenceProxies = 0;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = D1B816BB688F47152C777CD3 /* Products */;
+			productRefGroup = CCF05136D29BEDE2B4DD62B3 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				565281E0816CE7C15FAAE039 /* TRMNLHealthSync */,
+				2F0DE3266D97E9553A4A30E4 /* TRMNLHealthSync */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		F510C00AB955F49D34BC3D4D /* Resources */ = {
+		8B4A8C8F97E6747A21DE8DB7 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -158,24 +161,86 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		0C15135E31EA925B2DAE9EC7 /* Sources */ = {
+		EB71635E989EC24CDDB1AFCF /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				59B124045C5FB054C6E19C7D /* AppModel.swift in Sources */,
-				9879E34F8E75EBE4C5EA4FE0 /* ContentView.swift in Sources */,
-				8BFB123BF872920BAC16E2DF /* HealthKitStore.swift in Sources */,
-				E1AC2F6815126B4A071986B4 /* HomeAssistantClient.swift in Sources */,
-				20BB84894A3A7FBC7EFEE9FD /* KeychainStore.swift in Sources */,
-				FFB86888A7BB70976A1049F9 /* Models.swift in Sources */,
-				87DB3E4BF563BFE2B62DFF1B /* TRMNLHealthSyncApp.swift in Sources */,
+				C11C7A61BDEC5850CF2FDFA6 /* AppModel.swift in Sources */,
+				AE77B7270843789E2E335AA2 /* ContentView.swift in Sources */,
+				0F346163795E02DAD161C126 /* HealthKitStore.swift in Sources */,
+				09296B66555573B35C0C1069 /* HomeAssistantClient.swift in Sources */,
+				787E984C208EE66A764B5B38 /* KeychainStore.swift in Sources */,
+				ED0B8331781B9004C44C1601 /* Models.swift in Sources */,
+				4B66BFDD4E7A3A7F12D5F5B4 /* SelfHostedBridgeClient.swift in Sources */,
+				7EBDCF75D0980463B7EDA339 /* TRMNLHealthSyncApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		9205944CC476F41D18CA45EE /* Release */ = {
+		6D859B310D0D7E5EFA70F47B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "";
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = TRMNLHealthSync/TRMNLHealthSync.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "TRMNL Health Sync";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "TRMNL Health Sync reads your Apple Health data to mirror your daily activity on TRMNL through Home Assistant or your self-hosted bridge.";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 0.2.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.jordanleinberger.trmnlhealthsync;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		9EB4CEA4DA833786EAC177CC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "";
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = TRMNLHealthSync/TRMNLHealthSync.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "TRMNL Health Sync";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "TRMNL Health Sync reads your Apple Health data to mirror your daily activity on TRMNL through Home Assistant or your self-hosted bridge.";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 0.2.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.jordanleinberger.trmnlhealthsync;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		BE934F06574B5DB092B1C15A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -229,7 +294,7 @@
 			};
 			name = Release;
 		};
-		A59260CEAFF030875B849018 /* Debug */ = {
+		D49C0E8111B71DDD2147D3B1 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -290,89 +355,28 @@
 			};
 			name = Debug;
 		};
-		F4327CB02D33636195FA8ADC /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = "";
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				CODE_SIGN_ENTITLEMENTS = TRMNLHealthSync/TRMNLHealthSync.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "TRMNL Health Sync";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "TRMNL Health Sync reads your Apple Health data to mirror your daily activity on TRMNL and Home Assistant.";
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 0.1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = io.github.jordanleinberger.trmnlhealthsync;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
-		F61A75ADEE8A9F9154DF2867 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = "";
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				CODE_SIGN_ENTITLEMENTS = TRMNLHealthSync/TRMNLHealthSync.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "TRMNL Health Sync";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "TRMNL Health Sync reads your Apple Health data to mirror your daily activity on TRMNL and Home Assistant.";
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 0.1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = io.github.jordanleinberger.trmnlhealthsync;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
-			};
-			name = Debug;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		83AF666C446078914DF4F8C4 /* Build configuration list for PBXNativeTarget "TRMNLHealthSync" */ = {
+		9F7EBEF6E93AEE2C05D052C1 /* Build configuration list for PBXProject "TRMNLHealthSync" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				F4327CB02D33636195FA8ADC /* Release */,
-				F61A75ADEE8A9F9154DF2867 /* Debug */,
+				D49C0E8111B71DDD2147D3B1 /* Debug */,
+				BE934F06574B5DB092B1C15A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		AE13C0243227F41F06EA1603 /* Build configuration list for PBXProject "TRMNLHealthSync" */ = {
+		CF248E69DF4216CCF0387D9B /* Build configuration list for PBXNativeTarget "TRMNLHealthSync" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				A59260CEAFF030875B849018 /* Debug */,
-				9205944CC476F41D18CA45EE /* Release */,
+				6D859B310D0D7E5EFA70F47B /* Release */,
+				9EB4CEA4DA833786EAC177CC /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 19AAE56565285B9B7D9DD0CE /* Project object */;
+	rootObject = 1F28C7DFAF40F9B73AF021A8 /* Project object */;
 }

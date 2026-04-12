@@ -6,21 +6,52 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Home Assistant") {
-                    TextField("Instance URL", text: $model.instanceURLInput)
-                        .textInputAutocapitalization(.never)
-                        .keyboardType(.URL)
-                        .autocorrectionDisabled()
+                Section("Destination") {
+                    Picker("Sync through", selection: $model.syncDestinationInput) {
+                        ForEach(SyncDestination.allCases) { destination in
+                            Text(destination.displayName).tag(destination)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                }
 
-                    SecureField("Long-lived access token", text: $model.accessTokenInput)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
+                switch model.syncDestinationInput {
+                case .homeAssistant:
+                    Section("Home Assistant") {
+                        TextField("Instance URL", text: $model.instanceURLInput)
+                            .textInputAutocapitalization(.never)
+                            .keyboardType(.URL)
+                            .autocorrectionDisabled()
 
-                    TextField("Device label", text: $model.deviceNameInput)
+                        SecureField("Long-lived access token", text: $model.accessTokenInput)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+
+                        TextField("Device label", text: $model.deviceNameInput)
+                    }
+
+                case .selfHostedBridge:
+                    Section("Self-Hosted Bridge") {
+                        TextField("Bridge URL", text: $model.bridgeURLInput)
+                            .textInputAutocapitalization(.never)
+                            .keyboardType(.URL)
+                            .autocorrectionDisabled()
+
+                        SecureField("Setup token", text: $model.bridgeSetupTokenInput)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+
+                        TextField("TRMNL webhook URL", text: $model.trmnlWebhookURLInput)
+                            .textInputAutocapitalization(.never)
+                            .keyboardType(.URL)
+                            .autocorrectionDisabled()
+
+                        TextField("Device label", text: $model.deviceNameInput)
+                    }
                 }
 
                 Section("Actions") {
-                    Button("Connect & Sync") {
+                    Button(model.syncDestinationInput.connectButtonLabel) {
                         Task {
                             await model.connectAndSync()
                         }

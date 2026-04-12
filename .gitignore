@@ -2,3 +2,7 @@
 __pycache__/
 *.pyc
 .derived-data/
+.venv/
+data/
+ios/TRMNLHealthSync/TRMNLHealthSync.xcodeproj/project.xcworkspace/xcuserdata/
+ios/TRMNLHealthSync/TRMNLHealthSync.xcodeproj/xcuserdata/

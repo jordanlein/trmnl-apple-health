@@ -1,0 +1,14 @@
+services:
+  trmnl-health-bridge:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: trmnl-health-bridge
+    environment:
+      TRMNL_HEALTH_SETUP_TOKEN: change-me
+      TZ: America/Chicago
+    ports:
+      - "8421:8421"
+    restart: unless-stopped
+    volumes:
+      - ./data:/data

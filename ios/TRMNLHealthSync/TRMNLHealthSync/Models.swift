@@ -1,6 +1,31 @@
 import Foundation
 import UIKit
 
+enum SyncDestination: String, Codable, CaseIterable, Identifiable {
+    case homeAssistant = "home_assistant"
+    case selfHostedBridge = "self_hosted_bridge"
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .homeAssistant:
+            return "Home Assistant"
+        case .selfHostedBridge:
+            return "Self-Hosted Bridge"
+        }
+    }
+
+    var connectButtonLabel: String {
+        switch self {
+        case .homeAssistant:
+            return "Connect Home Assistant & Sync"
+        case .selfHostedBridge:
+            return "Connect Bridge & Sync"
+        }
+    }
+}
+
 struct HomeAssistantRegistration: Codable, Equatable {
     let webhookID: String
     let cloudhookURL: URL?
@@ -15,14 +40,123 @@ struct HomeAssistantRegistration: Codable, Equatable {
     }
 }
 
+struct SelfHostedBridgeRegistration: Codable, Equatable {
+    let deviceID: String
+    let deviceName: String
+    let profileName: String
+    let trmnlWebhookConfigured: Bool
+    let registeredAt: Date
+
+    enum CodingKeys: String, CodingKey {
+        case deviceID = "device_id"
+        case deviceName = "device_name"
+        case profileName = "profile_name"
+        case trmnlWebhookConfigured = "trmnl_webhook_configured"
+        case registeredAt = "registered_at"
+    }
+}
+
+struct SelfHostedBridgeRegistrationResponse: Codable, Equatable {
+    let deviceID: String
+    let deviceName: String
+    let profileName: String
+    let deviceToken: String
+    let trmnlWebhookConfigured: Bool
+    let defaultTRMNLWebhookConfigured: Bool
+    let registeredAt: Date
+
+    enum CodingKeys: String, CodingKey {
+        case deviceID = "device_id"
+        case deviceName = "device_name"
+        case profileName = "profile_name"
+        case deviceToken = "device_token"
+        case trmnlWebhookConfigured = "trmnl_webhook_configured"
+        case defaultTRMNLWebhookConfigured = "default_trmnl_webhook_configured"
+        case registeredAt = "registered_at"
+    }
+
+    var persistedRegistration: SelfHostedBridgeRegistration {
+        SelfHostedBridgeRegistration(
+            deviceID: deviceID,
+            deviceName: deviceName,
+            profileName: profileName,
+            trmnlWebhookConfigured: trmnlWebhookConfigured || defaultTRMNLWebhookConfigured,
+            registeredAt: registeredAt
+        )
+    }
+}
+
+struct SelfHostedBridgeSyncResponse: Codable, Equatable {
+    let deviceID: String
+    let storedAt: Date
+    let pushedToTRMNL: Bool
+    let trmnlWebhookConfigured: Bool
+    let trmnlPushError: String?
+
+    enum CodingKeys: String, CodingKey {
+        case deviceID = "device_id"
+        case storedAt = "stored_at"
+        case pushedToTRMNL = "pushed_to_trmnl"
+        case trmnlWebhookConfigured = "trmnl_webhook_configured"
+        case trmnlPushError = "trmnl_push_error"
+    }
+}
+
 struct AppConfiguration: Codable {
+    var syncDestination: SyncDestination = .homeAssistant
     var instanceURLString: String = ""
     var deviceName: String = DeviceIdentity.defaultDeviceName
     var registration: HomeAssistantRegistration?
+    var bridgeURLString: String = ""
+    var bridgeRegistration: SelfHostedBridgeRegistration?
+    var trmnlWebhookURLString: String = ""
     var lastSuccessfulSync: Date?
 
     var instanceURL: URL? {
         instanceURLString.normalizedURL
+    }
+
+    var bridgeURL: URL? {
+        bridgeURLString.normalizedURL
+    }
+
+    var trmnlWebhookURL: URL? {
+        trmnlWebhookURLString.normalizedURL
+    }
+
+    init() {}
+
+    enum CodingKeys: String, CodingKey {
+        case syncDestination
+        case instanceURLString
+        case deviceName
+        case registration
+        case bridgeURLString
+        case bridgeRegistration
+        case trmnlWebhookURLString
+        case lastSuccessfulSync
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        syncDestination =
+            try container.decodeIfPresent(SyncDestination.self, forKey: .syncDestination)
+            ?? .homeAssistant
+        instanceURLString =
+            try container.decodeIfPresent(String.self, forKey: .instanceURLString) ?? ""
+        deviceName =
+            try container.decodeIfPresent(String.self, forKey: .deviceName)
+            ?? DeviceIdentity.defaultDeviceName
+        registration =
+            try container.decodeIfPresent(HomeAssistantRegistration.self, forKey: .registration)
+        bridgeURLString =
+            try container.decodeIfPresent(String.self, forKey: .bridgeURLString) ?? ""
+        bridgeRegistration =
+            try container.decodeIfPresent(SelfHostedBridgeRegistration.self, forKey: .bridgeRegistration)
+        trmnlWebhookURLString =
+            try container.decodeIfPresent(String.self, forKey: .trmnlWebhookURLString) ?? ""
+        lastSuccessfulSync =
+            try container.decodeIfPresent(Date.self, forKey: .lastSuccessfulSync)
     }
 }
 
@@ -169,6 +303,16 @@ struct HealthSnapshot: Codable, Equatable {
     }
 }
 
+struct SelfHostedBridgeSnapshotRequest: Encodable {
+    let snapshot: HealthSnapshot
+    let trmnlWebhookURL: String?
+
+    enum CodingKeys: String, CodingKey {
+        case snapshot
+        case trmnlWebhookURL = "trmnl_webhook_url"
+    }
+}
+
 enum DeviceIdentity {
     private static let defaultsKey = "DeviceIdentity.identifier"
 
@@ -191,6 +335,9 @@ enum AppModelError: LocalizedError {
     case invalidInstanceURL
     case missingAccessToken
     case missingRegistration
+    case invalidBridgeURL
+    case missingBridgeSetupToken
+    case missingBridgeRegistration
     case healthDataUnavailable
 
     var errorDescription: String? {
@@ -201,6 +348,12 @@ enum AppModelError: LocalizedError {
             return "Enter a Home Assistant long-lived access token."
         case .missingRegistration:
             return "The app is not registered with Home Assistant yet."
+        case .invalidBridgeURL:
+            return "Enter a valid self-hosted bridge URL."
+        case .missingBridgeSetupToken:
+            return "Enter the self-hosted bridge setup token."
+        case .missingBridgeRegistration:
+            return "The app is not paired with the self-hosted bridge yet."
         case .healthDataUnavailable:
             return "Health data is not available on this device."
         }
@@ -217,5 +370,23 @@ extension String {
         }
 
         return URL(string: "http://\(trimmed)")
+    }
+}
+
+extension JSONEncoder {
+    static var trmnlHealthAPI: JSONEncoder {
+        let encoder = JSONEncoder()
+        encoder.keyEncodingStrategy = .convertToSnakeCase
+        encoder.dateEncodingStrategy = .iso8601
+        return encoder
+    }
+}
+
+extension JSONDecoder {
+    static var trmnlHealthAPI: JSONDecoder {
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        decoder.dateDecodingStrategy = .iso8601
+        return decoder
     }
 }

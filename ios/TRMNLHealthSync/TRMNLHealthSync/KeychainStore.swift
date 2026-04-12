@@ -3,14 +3,19 @@ import Security
 
 enum KeychainStore {
     private static let service = "TRMNLHealthSync"
-    private static let accessTokenAccount = "home_assistant_access_token"
 
-    static func saveAccessToken(_ token: String) throws {
+    enum SecretAccount: String {
+        case homeAssistantAccessToken = "home_assistant_access_token"
+        case selfHostedSetupToken = "self_hosted_setup_token"
+        case selfHostedDeviceToken = "self_hosted_device_token"
+    }
+
+    static func save(_ token: String, for account: SecretAccount) throws {
         let data = Data(token.utf8)
         let query: [CFString: Any] = [
             kSecClass: kSecClassGenericPassword,
             kSecAttrService: service,
-            kSecAttrAccount: accessTokenAccount,
+            kSecAttrAccount: account.rawValue,
         ]
 
         SecItemDelete(query as CFDictionary)
@@ -18,7 +23,7 @@ enum KeychainStore {
         let attributes: [CFString: Any] = [
             kSecClass: kSecClassGenericPassword,
             kSecAttrService: service,
-            kSecAttrAccount: accessTokenAccount,
+            kSecAttrAccount: account.rawValue,
             kSecValueData: data,
         ]
 
@@ -28,11 +33,11 @@ enum KeychainStore {
         }
     }
 
-    static func loadAccessToken() -> String? {
+    static func load(_ account: SecretAccount) -> String? {
         let query: [CFString: Any] = [
             kSecClass: kSecClassGenericPassword,
             kSecAttrService: service,
-            kSecAttrAccount: accessTokenAccount,
+            kSecAttrAccount: account.rawValue,
             kSecReturnData: true,
             kSecMatchLimit: kSecMatchLimitOne,
         ]
@@ -45,12 +50,20 @@ enum KeychainStore {
         return String(data: data, encoding: .utf8)
     }
 
-    static func clearAccessToken() {
+    static func clear(_ account: SecretAccount) {
         let query: [CFString: Any] = [
             kSecClass: kSecClassGenericPassword,
             kSecAttrService: service,
-            kSecAttrAccount: accessTokenAccount,
+            kSecAttrAccount: account.rawValue,
         ]
         SecItemDelete(query as CFDictionary)
     }
+
+    static func clearAll() {
+        SecretAccount.allCases.forEach { account in
+            clear(account)
+        }
+    }
 }
+
+extension KeychainStore.SecretAccount: CaseIterable {}

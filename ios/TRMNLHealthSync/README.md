@@ -12,8 +12,9 @@ The generated app:
 
 - requests HealthKit read access
 - computes a daily snapshot for steps, distance, flights climbed, move, exercise, and stand
-- registers with Home Assistant using the native `mobile_app` API
-- publishes Home Assistant sensors over the returned webhook
+- can sync to Home Assistant using the native `mobile_app` API
+- can sync to the standalone self-hosted bridge over its local pairing API
+- publishes Home Assistant sensors over the returned webhook when Home Assistant mode is selected
 - installs HealthKit observers so later changes can trigger a new sync
 
 Before building:
