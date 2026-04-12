@@ -7,12 +7,12 @@ from collections.abc import Awaitable, Callable
 import voluptuous as vol
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import ATTR_ENTRY_ID
 from homeassistant.core import HomeAssistant, ServiceCall
 
 from .const import DOMAIN, SERVICE_SYNC_NOW
 from .manager import TRMNLHealthBridgeManager
 
+ATTR_ENTRY_ID = "entry_id"
 ManagerMap = dict[str, TRMNLHealthBridgeManager]
 
 SERVICE_SCHEMA = vol.Schema(
