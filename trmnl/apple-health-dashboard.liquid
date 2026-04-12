@@ -21,7 +21,6 @@
 {% assign move_offset = 465 | times: move_remaining | divided_by: 100 %}
 {% assign exercise_offset = 327 | times: exercise_remaining | divided_by: 100 %}
 {% assign stand_offset = 188 | times: stand_remaining | divided_by: 100 %}
-{% assign captured_time = captured_at | date: "%-I:%M %p" %}
 
 <style>
   .health-screen {
@@ -36,10 +35,7 @@
   }
 
   .health-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 12px;
+    display: block;
   }
 
   .health-header__title {
@@ -242,10 +238,6 @@
           <span class="health-header__title">Activity Rings</span>
           <span class="health-header__meta">{{ date_label | default: "Today" }}</span>
         </div>
-        <div style="text-align:right;">
-          <span class="health-header__meta">{{ device_name | default: "iPhone" }}</span>
-          <span class="health-header__meta">updated {{ captured_time | default: "" }}</span>
-        </div>
       </div>
 
       <div class="health-shell">
@@ -321,7 +313,7 @@
 
       <div class="health-footer">
         <span>{{ profile_name | default: "Apple Health" }}</span>
-        <span>{{ device_name | default: "iPhone" }}</span>
+        <span>updated {{ sync_time_label | default: "" }}</span>
       </div>
     </div>
   </div>

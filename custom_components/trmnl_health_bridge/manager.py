@@ -18,6 +18,7 @@ from homeassistant.core import CALLBACK_TYPE, Event, HomeAssistant, callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.event import async_call_later, async_track_state_change_event
 from homeassistant.helpers.typing import StateType
+from homeassistant.util import dt as dt_util
 
 from .const import (
     CONF_DEBOUNCE_SECONDS,
@@ -210,10 +211,12 @@ class TRMNLHealthBridgeManager:
         attrs: dict[str, object],
     ) -> dict[str, object]:
         """Normalize the sensor attributes into a compact TRMNL payload."""
+        captured_at = attrs.get("captured_at", state)
         return {
             "profile_name": attrs.get("profile_name", self.context.name),
             "device_name": attrs.get("device_name", self.context.name),
-            "captured_at": attrs.get("captured_at", state),
+            "captured_at": captured_at,
+            "sync_time_label": _format_local_time(captured_at),
             "date_label": attrs.get("date_label", "Today"),
             "rings": {
                 "move": _round_number(attrs.get("move_kcal")),
@@ -244,3 +247,15 @@ def _round_number(value: object, digits: int = 0) -> int | float:
     if digits == 0:
         return int(round(number))
     return round(number, digits)
+
+
+def _format_local_time(value: object) -> str:
+    """Convert an ISO-ish timestamp into Home Assistant local time."""
+    if not value:
+        return ""
+
+    parsed = dt_util.parse_datetime(str(value))
+    if parsed is None:
+        return ""
+
+    return dt_util.as_local(parsed).strftime("%-I:%M %p")
