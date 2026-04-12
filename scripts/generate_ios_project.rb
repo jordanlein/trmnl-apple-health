@@ -8,6 +8,8 @@ repo_root = Pathname.new(__dir__).parent
 project_root = repo_root.join("ios", "TRMNLHealthSync")
 source_root = project_root.join("TRMNLHealthSync")
 project_path = project_root.join("TRMNLHealthSync.xcodeproj")
+app_icon_path = source_root.join("Assets.xcassets")
+privacy_manifest_path = source_root.join("PrivacyInfo.xcprivacy")
 
 FileUtils.rm_rf(project_path) if project_path.exist?
 
@@ -16,9 +18,12 @@ target = project.new_target(:application, "TRMNLHealthSync", :ios, "17.0")
 project.root_object.attributes["LastUpgradeCheck"] = "1650"
 
 source_group = project.main_group.find_subpath("TRMNLHealthSync", true)
+resources_group = source_group.find_subpath("Resources", true)
 
 Dir[source_root.join("**", "*")].sort.each do |path|
   next if File.directory?(path)
+  next if Pathname(path).to_s.start_with?(app_icon_path.to_s)
+  next if Pathname(path) == privacy_manifest_path
 
   relative_path = Pathname(path).relative_path_from(project_root).to_s
   reference = source_group.new_file(relative_path)
@@ -30,6 +35,16 @@ Dir[source_root.join("**", "*")].sort.each do |path|
     # Referenced from build settings only.
   end
 end
+
+asset_reference = resources_group.new_file(
+  app_icon_path.relative_path_from(project_root).to_s
+)
+target.resources_build_phase.add_file_reference(asset_reference)
+
+privacy_reference = resources_group.new_file(
+  privacy_manifest_path.relative_path_from(project_root).to_s
+)
+target.resources_build_phase.add_file_reference(privacy_reference)
 
 frameworks_group = project.frameworks_group
 %w[
@@ -46,7 +61,7 @@ project.build_configurations.each do |config|
 end
 
 target.build_configurations.each do |config|
-  config.build_settings["ASSETCATALOG_COMPILER_APPICON_NAME"] = ""
+  config.build_settings["ASSETCATALOG_COMPILER_APPICON_NAME"] = "AppIcon"
   config.build_settings["CODE_SIGN_ENTITLEMENTS"] = "TRMNLHealthSync/TRMNLHealthSync.entitlements"
   config.build_settings["CODE_SIGN_STYLE"] = "Automatic"
   config.build_settings["CURRENT_PROJECT_VERSION"] = "1"
@@ -64,7 +79,7 @@ target.build_configurations.each do |config|
     "$(inherited)",
     "@executable_path/Frameworks",
   ]
-  config.build_settings["MARKETING_VERSION"] = "0.2.0"
+  config.build_settings["MARKETING_VERSION"] = "1.0.0"
   config.build_settings["PRODUCT_BUNDLE_IDENTIFIER"] = "io.github.jordanleinberger.trmnlhealthsync"
   config.build_settings["PRODUCT_NAME"] = "$(TARGET_NAME)"
   config.build_settings["SUPPORTED_PLATFORMS"] = "iphoneos iphonesimulator"

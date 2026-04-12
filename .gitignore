@@ -4,5 +4,6 @@ __pycache__/
 .derived-data/
 .venv/
 data/
+.icon-build/
 ios/TRMNLHealthSync/TRMNLHealthSync.xcodeproj/project.xcworkspace/xcuserdata/
 ios/TRMNLHealthSync/TRMNLHealthSync.xcodeproj/xcuserdata/
