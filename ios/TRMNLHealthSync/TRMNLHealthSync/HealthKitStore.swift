@@ -145,7 +145,8 @@ final class HealthKitStore {
     }
 
     private func activitySummary(for date: Date) async throws -> HKActivitySummary? {
-        let components = Calendar.current.dateComponents([.year, .month, .day], from: date)
+        var components = Calendar.current.dateComponents([.calendar, .year, .month, .day], from: date)
+        components.calendar = Calendar.current
         let predicate = HKQuery.predicateForActivitySummary(with: components)
 
         return try await withCheckedThrowingContinuation { continuation in

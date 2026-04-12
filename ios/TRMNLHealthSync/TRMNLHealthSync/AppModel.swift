@@ -57,7 +57,7 @@ final class AppModel: ObservableObject {
         defer { isBusy = false }
 
         do {
-            guard let instanceURL = URL(string: instanceURLInput.trimmingCharacters(in: .whitespacesAndNewlines)) else {
+            guard let instanceURL = instanceURLInput.normalizedURL else {
                 throw AppModelError.invalidInstanceURL
             }
             let accessToken = accessTokenInput.trimmingCharacters(in: .whitespacesAndNewlines)

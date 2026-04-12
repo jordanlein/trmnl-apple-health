@@ -22,7 +22,7 @@ struct AppConfiguration: Codable {
     var lastSuccessfulSync: Date?
 
     var instanceURL: URL? {
-        URL(string: instanceURLString.trimmingCharacters(in: .whitespacesAndNewlines))
+        instanceURLString.normalizedURL
     }
 }
 
@@ -204,5 +204,18 @@ enum AppModelError: LocalizedError {
         case .healthDataUnavailable:
             return "Health data is not available on this device."
         }
+    }
+}
+
+extension String {
+    var normalizedURL: URL? {
+        let trimmed = trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+
+        if let url = URL(string: trimmed), url.scheme != nil {
+            return url
+        }
+
+        return URL(string: "http://\(trimmed)")
     }
 }
