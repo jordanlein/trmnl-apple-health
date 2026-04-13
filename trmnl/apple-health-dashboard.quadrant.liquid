@@ -28,28 +28,47 @@
     <div>{{ date_label | default: "Today" }}</div>
   </div>
 
+  <div class="outline rounded">
+    <table width="100%" cellpadding="8" cellspacing="0">
+      <tr>
+        <td align="center">
+          <svg width="96" height="96" viewBox="0 0 240 240" role="img" aria-label="Apple Health activity rings">
+            <circle cx="120" cy="120" r="81" fill="none" stroke="#f0f0e9" stroke-width="24"></circle>
+            <circle cx="120" cy="120" r="57" fill="none" stroke="#f0f0e9" stroke-width="24"></circle>
+            <circle cx="120" cy="120" r="33" fill="none" stroke="#f0f0e9" stroke-width="22"></circle>
+            <circle cx="120" cy="120" r="81" fill="none" stroke="#d7d7cf" stroke-width="16"></circle>
+            <circle cx="120" cy="120" r="57" fill="none" stroke="#d7d7cf" stroke-width="16"></circle>
+            <circle cx="120" cy="120" r="33" fill="none" stroke="#d7d7cf" stroke-width="14"></circle>
+            <circle cx="120" cy="120" r="81" fill="none" stroke="#111111" stroke-width="16" stroke-linecap="round" stroke-dasharray="509" stroke-dashoffset="{{ move_offset }}" transform="rotate(-90 120 120)"></circle>
+            <circle cx="120" cy="120" r="57" fill="none" stroke="#565656" stroke-width="16" stroke-linecap="round" stroke-dasharray="358" stroke-dashoffset="{{ exercise_offset }}" transform="rotate(-90 120 120)"></circle>
+            <circle cx="120" cy="120" r="33" fill="none" stroke="#919191" stroke-width="14" stroke-linecap="round" stroke-dasharray="207" stroke-dashoffset="{{ stand_offset }}" transform="rotate(-90 120 120)"></circle>
+          </svg>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td>M</td>
+              <td align="right"><strong>{{ move_percent_raw }}%</strong></td>
+            </tr>
+            <tr>
+              <td>E</td>
+              <td align="right"><strong>{{ exercise_percent_raw }}%</strong></td>
+            </tr>
+            <tr>
+              <td>S</td>
+              <td align="right"><strong>{{ stand_percent_raw }}%</strong></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </div>
+
   <table width="100%" cellpadding="0" cellspacing="0">
     <tr>
-      <td width="92" align="center" valign="top">
-        <svg width="88" height="88" viewBox="0 0 240 240" role="img" aria-label="Apple Health activity rings">
-          <circle cx="120" cy="120" r="81" fill="none" stroke="#f1f1eb" stroke-width="24"></circle>
-          <circle cx="120" cy="120" r="57" fill="none" stroke="#f1f1eb" stroke-width="24"></circle>
-          <circle cx="120" cy="120" r="33" fill="none" stroke="#f1f1eb" stroke-width="22"></circle>
-          <circle cx="120" cy="120" r="81" fill="none" stroke="#d9d9d2" stroke-width="16"></circle>
-          <circle cx="120" cy="120" r="57" fill="none" stroke="#d9d9d2" stroke-width="16"></circle>
-          <circle cx="120" cy="120" r="33" fill="none" stroke="#d9d9d2" stroke-width="14"></circle>
-          <circle cx="120" cy="120" r="81" fill="none" stroke="#111111" stroke-width="16" stroke-linecap="round" stroke-dasharray="509" stroke-dashoffset="{{ move_offset }}" transform="rotate(-90 120 120)"></circle>
-          <circle cx="120" cy="120" r="57" fill="none" stroke="#535353" stroke-width="16" stroke-linecap="round" stroke-dasharray="358" stroke-dashoffset="{{ exercise_offset }}" transform="rotate(-90 120 120)"></circle>
-          <circle cx="120" cy="120" r="33" fill="none" stroke="#8f8f8f" stroke-width="14" stroke-linecap="round" stroke-dasharray="207" stroke-dashoffset="{{ stand_offset }}" transform="rotate(-90 120 120)"></circle>
-        </svg>
-      </td>
-      <td valign="top">
-        <div>M <strong>{{ move_percent_raw }}%</strong></div>
-        <div>E <strong>{{ exercise_percent_raw }}%</strong></div>
-        <div>S <strong>{{ stand_percent_raw }}%</strong></div>
-        <hr>
-        <div><strong>{{ activity.steps | default: 0 }}</strong> steps</div>
-      </td>
+      <td><strong>{{ activity.steps | default: 0 }}</strong> steps</td>
     </tr>
   </table>
 </div>
