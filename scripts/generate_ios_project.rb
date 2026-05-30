@@ -68,7 +68,7 @@ target.build_configurations.each do |config|
   config.build_settings["DEVELOPMENT_TEAM"] = ""
   config.build_settings["GENERATE_INFOPLIST_FILE"] = "YES"
   config.build_settings["INFOPLIST_KEY_CFBundleDisplayName"] = "TRMNL Health Sync"
-  config.build_settings["INFOPLIST_KEY_NSHealthShareUsageDescription"] = "TRMNL Health Sync reads your Apple Health data to mirror your daily activity on TRMNL through Home Assistant or your self-hosted bridge."
+  config.build_settings["INFOPLIST_KEY_NSHealthShareUsageDescription"] = "TRMNL Health Sync reads your Apple Health activity data to mirror daily rings on your TRMNL display through your selected destination."
   config.build_settings["INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents"] = "YES"
   config.build_settings["INFOPLIST_KEY_UILaunchScreen_Generation"] = "YES"
   config.build_settings["INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone"] = [

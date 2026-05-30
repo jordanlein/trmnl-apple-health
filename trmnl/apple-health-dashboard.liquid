@@ -1,130 +1,82 @@
+{% assign steps_today = activity.steps | default: 0 | plus: 0 %}
+{% assign sleep_today = health.sleep_hours | default: 0 | plus: 0 %}
+{% assign latest_heart_rate = health.latest_heart_rate_bpm | default: 0 | plus: 0 %}
+
 {% assign move_percent_raw = rings.move_percent | default: 0 | plus: 0 %}
 {% assign exercise_percent_raw = rings.exercise_percent | default: 0 | plus: 0 %}
 {% assign stand_percent_raw = rings.stand_percent | default: 0 | plus: 0 %}
-
-{% assign move_progress = move_percent_raw %}
-{% if move_progress < 0 %}{% assign move_progress = 0 %}{% endif %}
-{% if move_progress > 100 %}{% assign move_progress = 100 %}{% endif %}
-
-{% assign exercise_progress = exercise_percent_raw %}
-{% if exercise_progress < 0 %}{% assign exercise_progress = 0 %}{% endif %}
-{% if exercise_progress > 100 %}{% assign exercise_progress = 100 %}{% endif %}
-
-{% assign stand_progress = stand_percent_raw %}
-{% if stand_progress < 0 %}{% assign stand_progress = 0 %}{% endif %}
-{% if stand_progress > 100 %}{% assign stand_progress = 100 %}{% endif %}
-
+{% assign move_progress = move_percent_raw %}{% if move_progress < 0 %}{% assign move_progress = 0 %}{% endif %}{% if move_progress > 100 %}{% assign move_progress = 100 %}{% endif %}
+{% assign exercise_progress = exercise_percent_raw %}{% if exercise_progress < 0 %}{% assign exercise_progress = 0 %}{% endif %}{% if exercise_progress > 100 %}{% assign exercise_progress = 100 %}{% endif %}
+{% assign stand_progress = stand_percent_raw %}{% if stand_progress < 0 %}{% assign stand_progress = 0 %}{% endif %}{% if stand_progress > 100 %}{% assign stand_progress = 100 %}{% endif %}
 {% assign move_remaining = 100 | minus: move_progress %}
 {% assign exercise_remaining = 100 | minus: exercise_progress %}
 {% assign stand_remaining = 100 | minus: stand_progress %}
-
 {% assign move_offset = 509 | times: move_remaining | divided_by: 100 %}
 {% assign exercise_offset = 358 | times: exercise_remaining | divided_by: 100 %}
 {% assign stand_offset = 207 | times: stand_remaining | divided_by: 100 %}
+{% assign latest_workout = health.latest_workout %}
 
 <div class="layout layout--col">
   <table width="100%" cellpadding="0" cellspacing="0">
     <tr>
-      <td valign="top">
-        <h1>Activity Rings</h1>
-        <div>{{ date_label | default: "Today" }}</div>
+      <td>
+        <h1>Apple Health</h1>
+        <div>{{ 'now' | date: "%A, %B %-d" }}</div>
       </td>
-      <td align="right" valign="bottom">
-        <div>{{ profile_name | default: "Apple Health" }}</div>
+      <td align="right" valign="top">
+        <div class="label">Updated by TRMNL Health Sync</div>
+        <div>{{ sync_time_label | default: "Waiting for first sync" }}</div>
       </td>
     </tr>
   </table>
 
-  <div class="outline rounded">
-    <table width="100%" cellpadding="14" cellspacing="0">
+  <div class="outline rounded p--2">
+    <table width="100%" cellpadding="0" cellspacing="0">
       <tr>
-        <td width="232" align="center" valign="middle">
-          <svg width="208" height="208" viewBox="0 0 240 240" role="img" aria-label="Apple Health activity rings">
+        <td width="205" align="center" valign="middle">
+          <svg width="188" height="188" viewBox="0 0 240 240" role="img" aria-label="Apple Health activity rings">
             <circle cx="120" cy="120" r="81" fill="none" stroke="#f0f0e9" stroke-width="24"></circle>
             <circle cx="120" cy="120" r="57" fill="none" stroke="#f0f0e9" stroke-width="24"></circle>
             <circle cx="120" cy="120" r="33" fill="none" stroke="#f0f0e9" stroke-width="22"></circle>
-
-            <circle cx="120" cy="120" r="81" fill="none" stroke="#d7d7cf" stroke-width="16"></circle>
-            <circle cx="120" cy="120" r="57" fill="none" stroke="#d7d7cf" stroke-width="16"></circle>
-            <circle cx="120" cy="120" r="33" fill="none" stroke="#d7d7cf" stroke-width="14"></circle>
-
             <circle cx="120" cy="120" r="81" fill="none" stroke="#111111" stroke-width="16" stroke-linecap="round" stroke-dasharray="509" stroke-dashoffset="{{ move_offset }}" transform="rotate(-90 120 120)"></circle>
             <circle cx="120" cy="120" r="57" fill="none" stroke="#565656" stroke-width="16" stroke-linecap="round" stroke-dasharray="358" stroke-dashoffset="{{ exercise_offset }}" transform="rotate(-90 120 120)"></circle>
             <circle cx="120" cy="120" r="33" fill="none" stroke="#919191" stroke-width="14" stroke-linecap="round" stroke-dasharray="207" stroke-dashoffset="{{ stand_offset }}" transform="rotate(-90 120 120)"></circle>
           </svg>
         </td>
-        <td valign="top">
-          <table width="100%" cellpadding="0" cellspacing="0">
-            <tr>
-              <td valign="top">
-                <div><strong>Move</strong></div>
-                <div><strong>{{ rings.move | default: 0 }}</strong> CAL</div>
-                <div>Goal {{ rings.move_goal | default: 0 }} CAL</div>
-              </td>
-              <td width="74" align="right" valign="top">
-                <strong>{{ move_percent_raw }}%</strong>
-              </td>
-            </tr>
-            <tr>
-              <td colspan="2" height="14"><hr></td>
-            </tr>
-            <tr>
-              <td valign="top">
-                <div><strong>Exercise</strong></div>
-                <div><strong>{{ rings.exercise | default: 0 }}</strong> MIN</div>
-                <div>Goal {{ rings.exercise_goal | default: 0 }} MIN</div>
-              </td>
-              <td width="74" align="right" valign="top">
-                <strong>{{ exercise_percent_raw }}%</strong>
-              </td>
-            </tr>
-            <tr>
-              <td colspan="2" height="14"><hr></td>
-            </tr>
-            <tr>
-              <td valign="top">
-                <div><strong>Stand</strong></div>
-                <div><strong>{{ rings.stand | default: 0 }}</strong> HRS</div>
-                <div>Goal {{ rings.stand_goal | default: 0 }} HRS</div>
-              </td>
-              <td width="74" align="right" valign="top">
-                <strong>{{ stand_percent_raw }}%</strong>
-              </td>
-            </tr>
+        <td width="265" valign="middle">
+          <table width="100%" cellpadding="5" cellspacing="0">
+            <tr><td>Move</td><td align="right"><strong>{{ rings.move | default: 0 }} / {{ rings.move_goal | default: 0 }} CAL</strong></td><td width="48" align="right">{{ move_percent_raw }}%</td></tr>
+            <tr><td>Exercise</td><td align="right"><strong>{{ rings.exercise | default: 0 }} / {{ rings.exercise_goal | default: 0 }} MIN</strong></td><td align="right">{{ exercise_percent_raw }}%</td></tr>
+            <tr><td>Stand</td><td align="right"><strong>{{ rings.stand | default: 0 }} / {{ rings.stand_goal | default: 0 }} HRS</strong></td><td align="right">{{ stand_percent_raw }}%</td></tr>
+          </table>
+        </td>
+        <td width="18"></td>
+        <td valign="middle">
+          <table width="100%" cellpadding="5" cellspacing="0">
+            <tr><td class="label">Steps</td><td align="right"><strong>{{ steps_today | round }}</strong></td></tr>
+            <tr><td class="label">Heart rate</td><td align="right"><strong>{{ latest_heart_rate | round }} BPM</strong></td></tr>
+            <tr><td class="label">Sleep</td><td align="right"><strong>{{ sleep_today | round: 1 }} HRS</strong></td></tr>
+            <tr><td class="label">Distance</td><td align="right"><strong>{{ activity.distance_mi | default: 0 }} MI</strong></td></tr>
+            <tr><td class="label">Flights</td><td align="right"><strong>{{ activity.flights_climbed | default: 0 }}</strong></td></tr>
           </table>
         </td>
       </tr>
     </table>
   </div>
 
-  <div class="outline rounded">
-    <table width="100%" cellpadding="12" cellspacing="0">
-      <tr>
-        <td width="33.33%" valign="top">
-          <div><strong>Steps</strong></div>
-          <div><strong>{{ activity.steps | default: 0 }}</strong></div>
-          <div>Today</div>
-        </td>
-        <td width="33.33%" valign="top">
-          <div><strong>Distance</strong></div>
-          <div><strong>{{ activity.distance_mi | default: 0 }}</strong> MI</div>
-          <div>{{ activity.distance_km | default: 0 }} km</div>
-        </td>
-        <td width="33.33%" valign="top">
-          <div><strong>Flights</strong></div>
-          <div><strong>{{ activity.flights_climbed | default: 0 }}</strong></div>
-          <div>Floors climbed</div>
-        </td>
-      </tr>
-    </table>
-  </div>
-
   <table width="100%" cellpadding="0" cellspacing="0">
     <tr>
-      <td></td>
+      <td>
+        <div class="label">Latest workout</div>
+        {% if latest_workout %}
+          <strong>{{ latest_workout.activity_type }}</strong> - {{ latest_workout.start_date | date: "%a, %b %-d" }}
+        {% else %}
+          Waiting for workout data
+        {% endif %}
+      </td>
       <td align="right">
-        {% if sync_time_label %}
-          Updated {{ sync_time_label }}
+        {% if latest_workout %}
+          <strong>{{ latest_workout.duration_seconds | divided_by: 60 | round }} MIN</strong> - {{ latest_workout.total_energy_burned_kilocalories | round }} CAL
         {% endif %}
       </td>
     </tr>

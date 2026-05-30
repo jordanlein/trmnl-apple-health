@@ -1,30 +1,37 @@
 # TRMNL Apple Health
 
-Mirror your Apple Health activity data on a TRMNL e-ink display with a companion iPhone app and a server you control.
+Display Apple Health data and activity rings on a TRMNL e-ink screen with a
+webhook-strategy Private Plugin and the lightweight `TRMNLHealthSync` iPhone
+app in this repo.
 
-This project gives you two ways to run the bridge:
+## Recommended architecture
 
-- `Home Assistant mode`
-  Best if you already run Home Assistant and want the Health snapshot to exist as native HA sensors.
-- `Self-hosted bridge mode`
-  Best if you want a lighter setup without Home Assistant. Run one small local server with Docker and let it push directly to TRMNL.
+Use one iPhone app against one Private Plugin:
 
-The iPhone app reads Apple Health data from HealthKit, builds a compact daily snapshot, and sends that snapshot to the server path you choose. The server then pushes a webhook payload to a TRMNL Private Plugin, and TRMNL renders the bundled markup.
+```text
+iPhone -> TRMNLHealthSync -> TRMNL Private Plugin -> display
+```
 
-App Store link: coming soon
+`TRMNLHealthSync` reads the compact daily dashboard directly from HealthKit:
+rings, steps, distance, flights, latest heart rate, sleep, and the latest
+workout. Home Assistant and the self-hosted bridge remain optional.
+
+For scheduled refreshes, add this app's `Sync Apple Health` action to a
+Shortcuts automation.
 
 ## What it shows
 
-- Apple Watch / Apple Health activity rings:
-  - Move
-  - Exercise
-  - Stand
-- Daily steps
-- Daily walking/running distance
-- Flights climbed
-- Last sync time in local timezone
+- daily steps
+- active energy
+- latest heart rate
+- sleep ending today
+- latest workout
+- Move, Exercise, and Stand activity rings
+- walking/running distance
+- flights climbed
+- sync time
 
-## How it works
+## Legacy bridge architecture
 
 ### Home Assistant mode
 
@@ -53,13 +60,24 @@ App Store link: coming soon
 - `ios/TRMNLHealthSync/`
   iPhone app sources plus the Xcode project generator.
 - `trmnl/`
-  Ready-to-paste TRMNL plugin markup plus recipe-publisher assets for the four TRMNL view sizes and custom field YAML.
+  Single-app TRMNL markup plus recipe-publisher assets for the four TRMNL view sizes and custom field YAML.
 - `docs/`
   Setup, architecture, privacy, and publishing notes.
 - `scripts/generate_ios_project.rb`
   Generates the checked-in Xcode project from source files.
 - `branding/`
   Source logo artwork.
+
+## Recommended setup
+
+1. In the TRMNL web app, create a `Private Plugin` using the `Webhook` strategy.
+2. In the TRMNL Private Plugin editor, paste the matching layout templates from
+   `trmnl/`.
+3. Build and install `TRMNLHealthSync`, choose `TRMNL Direct`, paste the
+   Private Plugin webhook URL, and tap `Connect TRMNL & Sync`.
+4. Approve the requested HealthKit permissions.
+5. Optionally create a Shortcuts automation that runs
+   `TRMNL Health Sync -> Sync Apple Health`.
 
 ## Requirements
 
@@ -69,7 +87,7 @@ App Store link: coming soon
 - A TRMNL device
 - A TRMNL Private Plugin using the `Webhook` data strategy
 
-### Choose one server path
+### Optional server paths
 
 - `Home Assistant mode`
   - Home Assistant
@@ -83,7 +101,7 @@ App Store link: coming soon
 - Xcode
 - An Apple Developer account if you want to install broadly, TestFlight, or publish to the App Store
 
-## Step-by-step setup
+## Optional self-hosted setup
 
 ## 1. Create the TRMNL plugin
 
@@ -107,6 +125,7 @@ If you are publishing this in the TRMNL marketplace instead of using it only as 
 - `trmnl/apple-health-dashboard.half_horizontal.liquid` for the `half_horizontal` layout markup
 - `trmnl/apple-health-dashboard.half_vertical.liquid` for the `half_vertical` layout markup
 - `trmnl/apple-health-dashboard.quadrant.liquid` for the `quadrant` layout markup
+- `trmnl/apple-health-dashboard.transform.js` for the Node `Serverless` transform
 
 ## 2. Pick your server mode
 
@@ -226,25 +245,29 @@ on your TRMNL display after the next refresh.
 
 ## Daily use
 
-- The app installs HealthKit observers so it can sync again when Health data changes.
+- Run `Sync Apple Health` from Shortcuts on a schedule for predictable updates.
+- The app also installs HealthKit observers and coalesces direct TRMNL updates
+  to respect the webhook rate limit.
 - Opening the app and tapping `Sync Now` will always force a refresh.
 - In Home Assistant mode, the integration debounces updates to stay within TRMNL webhook limits.
 - In self-hosted mode, the bridge stores the latest snapshot locally and pushes it out to TRMNL.
 
 ## Privacy model
 
-This project is designed around user-controlled infrastructure.
+The recommended path sends one compact Apple Health snapshot from
+`TRMNLHealthSync` directly to the user's TRMNL Private Plugin.
 
-- In `Home Assistant mode`, the data path is:
+The optional legacy paths add a self-hosted hop:
+
+- In `Home Assistant mode`:
   `iPhone -> Home Assistant -> TRMNL`
-- In `Self-hosted bridge mode`, the data path is:
+- In `Self-hosted bridge mode`:
   `iPhone -> self-hosted bridge -> TRMNL`
 
-The project does not require:
+The recommended direct path does not require:
 
-- a vendor-hosted health-data backend
-- advertising use of HealthKit data
-- clinical Health Records access
+- Home Assistant
+- a self-hosted server
 - public inbound access to the user's home network
 
 See `docs/privacy.md` for the fuller privacy notes.
@@ -266,18 +289,17 @@ See `docs/privacy.md` for the fuller privacy notes.
 
 Implemented:
 
+- single-app direct architecture and Shortcuts documentation
 - HACS custom integration
 - Standalone Docker-friendly bridge
-- iPhone app with Home Assistant and self-hosted bridge destinations
-- TRMNL Liquid markup
+- iPhone app with direct TRMNL, Home Assistant, and self-hosted bridge destinations
+- discoverable `Sync Apple Health` Shortcuts action
+- single-app TRMNL Liquid markup
 - app icon/logo assets
 - App Store-oriented entitlement cleanup and privacy manifest
 
-Still external to the repo:
+Required before recipe publication:
 
-- App Store Connect listing
-- App Store screenshots and metadata
-- final privacy policy URL
 - TRMNL marketplace submission
 
 ## Troubleshooting
@@ -306,7 +328,10 @@ If you install the Python dependencies outside Docker, use Python 3.13 or 3.12. 
 The intended public product story is:
 
 - publish the TRMNL plugin
-- publish the iPhone app
-- let users run either Home Assistant or the standalone self-hosted bridge
+- direct users to install `TRMNLHealthSync`
+- let users grant HealthKit read access in the app
+- connect one Private Plugin webhook
+- optionally run one sync action from Shortcuts
+- retain Home Assistant and the standalone self-hosted bridge as optional legacy paths
 
-That keeps custody of Health data on the user’s side rather than yours.
+This keeps setup small: one app, one webhook, and one optional automation.

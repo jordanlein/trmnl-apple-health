@@ -153,7 +153,7 @@ class TRMNLHealthBridgeManager:
                     json=body,
                     headers={
                         "Content-Type": "application/json",
-                        "User-Agent": "home-assistant-trmnl-health-bridge/0.1.0",
+                        "User-Agent": "home-assistant-trmnl-health-bridge/0.1.5",
                     },
                     timeout=20,
                 ) as response:
@@ -234,6 +234,11 @@ class TRMNLHealthBridgeManager:
                 "distance_km": _round_number(attrs.get("distance_km"), 2),
                 "distance_mi": _round_number(attrs.get("distance_mi"), 2),
                 "flights_climbed": _round_number(attrs.get("flights_climbed")),
+            },
+            "health": {
+                "latest_heart_rate_bpm": _round_number(attrs.get("latest_heart_rate_bpm")),
+                "sleep_hours": _round_number(attrs.get("sleep_hours"), 1),
+                "latest_workout": attrs.get("latest_workout"),
             },
         }
 

@@ -40,6 +40,22 @@ def build_merge_variables(
             "distance_mi": round(snapshot.distance_miles, 2),
             "flights_climbed": snapshot.flights_climbed,
         },
+        "health": {
+            "latest_heart_rate_bpm": snapshot.latest_heart_rate_bpm,
+            "sleep_hours": round(snapshot.sleep_hours, 1),
+            "latest_workout": (
+                {
+                    "activity_type": snapshot.latest_workout.activity_type,
+                    "start_date": _iso8601(snapshot.latest_workout.start_date),
+                    "duration_seconds": round(snapshot.latest_workout.duration_seconds),
+                    "total_energy_burned_kilocalories": round(
+                        snapshot.latest_workout.total_energy_burned_kilocalories
+                    ),
+                }
+                if snapshot.latest_workout
+                else None
+            ),
+        },
     }
 
 

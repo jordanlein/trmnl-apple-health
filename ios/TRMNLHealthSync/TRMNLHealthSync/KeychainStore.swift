@@ -8,6 +8,7 @@ enum KeychainStore {
         case homeAssistantAccessToken = "home_assistant_access_token"
         case selfHostedSetupToken = "self_hosted_setup_token"
         case selfHostedDeviceToken = "self_hosted_device_token"
+        case trmnlWebhookURL = "trmnl_webhook_url"
     }
 
     static func save(_ token: String, for account: SecretAccount) throws {

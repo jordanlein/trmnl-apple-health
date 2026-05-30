@@ -38,6 +38,15 @@ class DeviceRegistrationResponse(DeviceRegistration):
     default_trmnl_webhook_configured: bool
 
 
+class LatestWorkoutPayload(BaseModel):
+    """Compact latest-workout summary sent from the iPhone app."""
+
+    activity_type: str
+    start_date: datetime
+    duration_seconds: float
+    total_energy_burned_kilocalories: float
+
+
 class SnapshotPayload(BaseModel):
     """Daily Apple Health snapshot sent from the iPhone app."""
 
@@ -59,6 +68,9 @@ class SnapshotPayload(BaseModel):
     stand_hours: int
     stand_goal_hours: int
     stand_percent: int
+    latest_heart_rate_bpm: int = 0
+    sleep_hours: float = 0
+    latest_workout: LatestWorkoutPayload | None = None
 
 
 class SnapshotUpdateRequest(BaseModel):

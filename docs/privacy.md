@@ -2,43 +2,44 @@
 
 ## Default posture
 
-This project is designed so the user can keep their Apple Health data on infrastructure they control.
+The recommended path is direct:
 
-Supported paths:
+```text
+iPhone -> TRMNLHealthSync -> TRMNL Private Plugin -> display
+```
 
-- iPhone app -> Home Assistant -> TRMNL
-- iPhone app -> self-hosted bridge -> TRMNL
+The user grants HealthKit read permission in the app. The app sends one compact
+dashboard snapshot to the configured TRMNL webhook.
 
-## What the iPhone app reads
+## What the app reads
 
+- Move, Exercise, and Stand rings and goals
 - steps
 - walking/running distance
 - flights climbed
-- active energy burned
-- exercise minutes
-- stand hours
-- activity goals and percentages
+- latest heart-rate sample
+- recent sleep duration
+- latest workout summary
 
-## What leaves the phone
+## What the app sends
 
-Only the compact daily snapshot needed to render the TRMNL display leaves the phone.
+Only the values required for the TRMNL dashboard leave the phone:
 
-That snapshot includes:
+- timestamp and device/profile label
+- ring values, goals, and percentages
+- daily activity totals
+- latest heart rate
+- sleep duration
+- latest workout type, date, duration, and active energy
 
-- timestamp
-- device/profile label
-- steps
-- distance
-- flights climbed
-- move / exercise / stand values and goals
+The app does not upload complete HealthKit sample histories.
 
-## What this repo does not require
+## Optional bridge paths
 
-- a vendor-hosted cloud
-- advertising use of HealthKit data
-- clinical record access
-- public inbound access to the user’s home network
+Users may intentionally choose:
 
-## Operational note
+- `iPhone -> Home Assistant -> TRMNL`
+- `iPhone -> self-hosted bridge -> TRMNL`
 
-TRMNL still receives the rendered plugin data needed for the display, so users should treat the TRMNL webhook as sensitive configuration and keep their self-hosted bridge or Home Assistant instance private.
+Direct mode does not require Home Assistant, a self-hosted server, or public
+inbound access to a home network. Treat the TRMNL webhook URL as a secret.

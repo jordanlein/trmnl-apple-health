@@ -15,23 +15,29 @@ final class AppModel: ObservableObject {
     @Published var isBusy = false
     @Published var didFinishInitialLoad = false
 
+    var hasConfiguredDestination: Bool {
+        hasSavedRegistration
+    }
+
     private var configuration: AppConfiguration
     private let healthKitStore = HealthKitStore()
+    private let directTRMNLClient = DirectTRMNLClient()
     private let homeAssistantClient = HomeAssistantClient()
     private let selfHostedBridgeClient = SelfHostedBridgeClient()
     private var observersInstalled = false
-    private let defaultsKey = "TRMNLHealthSync.configuration"
+    private var observerSyncTask: Task<Void, Never>?
     private var hasRegisteredSensors = false
 
     init() {
-        let loaded = Self.loadConfiguration(defaultsKey: defaultsKey)
+        let loaded = AppConfigurationStore.load()
         configuration = loaded
         syncDestinationInput = loaded.syncDestination
         instanceURLInput = loaded.instanceURLString
         accessTokenInput = KeychainStore.load(.homeAssistantAccessToken) ?? ""
         bridgeURLInput = loaded.bridgeURLString
         bridgeSetupTokenInput = KeychainStore.load(.selfHostedSetupToken) ?? ""
-        trmnlWebhookURLInput = loaded.trmnlWebhookURLString
+        trmnlWebhookURLInput =
+            KeychainStore.load(.trmnlWebhookURL) ?? loaded.trmnlWebhookURLString
         deviceNameInput = loaded.deviceName
     }
 
@@ -68,6 +74,8 @@ final class AppModel: ObservableObject {
         do {
             try await healthKitStore.requestAuthorization()
             switch syncDestinationInput {
+            case .directTRMNL:
+                try connectDirectTRMNL()
             case .homeAssistant:
                 try await connectHomeAssistant()
             case .selfHostedBridge:
@@ -95,7 +103,7 @@ final class AppModel: ObservableObject {
 
     func resetConfiguration() {
         configuration = AppConfiguration()
-        syncDestinationInput = .homeAssistant
+        syncDestinationInput = .directTRMNL
         instanceURLInput = ""
         accessTokenInput = ""
         bridgeURLInput = ""
@@ -105,12 +113,28 @@ final class AppModel: ObservableObject {
         lastSnapshot = nil
         hasRegisteredSensors = false
         observersInstalled = false
+        observerSyncTask?.cancel()
+        observerSyncTask = nil
         KeychainStore.clearAll()
-        UserDefaults.standard.removeObject(forKey: defaultsKey)
+        AppConfigurationStore.clear()
         statusMessage = "Cleared local configuration."
     }
 
-    func handleObserverUpdate() async {
+    func scheduleObserverSync() {
+        observerSyncTask?.cancel()
+        let delaySeconds = observerSyncDelaySeconds
+        observerSyncTask = Task { [weak self] in
+            do {
+                try await Task.sleep(nanoseconds: UInt64(delaySeconds * 1_000_000_000))
+            } catch {
+                return
+            }
+            guard !Task.isCancelled else { return }
+            await self?.syncAfterObserverDelay()
+        }
+    }
+
+    private func syncAfterObserverDelay() async {
         do {
             try await syncNow(reason: "healthkit")
         } catch {
@@ -123,6 +147,20 @@ final class AppModel: ObservableObject {
         lastSnapshot = snapshot
 
         switch configuration.syncDestination {
+        case .directTRMNL:
+            guard
+                let webhookValue = KeychainStore.load(.trmnlWebhookURL),
+                let webhookURL = webhookValue.normalizedURL,
+                webhookURL.isTRMNLPrivatePluginWebhookURL
+            else {
+                throw AppModelError.missingTRMNLWebhookURL
+            }
+            try await directTRMNLClient.updateSnapshot(
+                webhookURL: webhookURL,
+                snapshot: snapshot
+            )
+            statusMessage = "Last sync: \(snapshot.capturedAt.formatted(date: .omitted, time: .shortened)) (\(reason), pushed)"
+
         case .homeAssistant:
             guard configuration.registration != nil else {
                 throw AppModelError.missingRegistration
@@ -182,8 +220,24 @@ final class AppModel: ObservableObject {
         guard !observersInstalled else { return }
         observersInstalled = true
         healthKitStore.installObservers { [weak self] in
-            await self?.handleObserverUpdate()
+            await self?.scheduleObserverSync()
         }
+    }
+
+    private func connectDirectTRMNL() throws {
+        let webhookValue = trmnlWebhookURLInput.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard
+            let webhookURL = webhookValue.normalizedURL,
+            webhookURL.isTRMNLPrivatePluginWebhookURL
+        else {
+            throw AppModelError.invalidTRMNLWebhookURL
+        }
+
+        configuration.syncDestination = .directTRMNL
+        configuration.deviceName = deviceNameInput
+        try KeychainStore.save(webhookURL.absoluteString, for: .trmnlWebhookURL)
+        try saveConfiguration()
+        hasRegisteredSensors = false
     }
 
     private func connectHomeAssistant() async throws {
@@ -239,22 +293,13 @@ final class AppModel: ObservableObject {
     }
 
     private func saveConfiguration() throws {
-        let data = try JSONEncoder().encode(configuration)
-        UserDefaults.standard.set(data, forKey: defaultsKey)
-    }
-
-    private static func loadConfiguration(defaultsKey: String) -> AppConfiguration {
-        guard
-            let data = UserDefaults.standard.data(forKey: defaultsKey),
-            let decoded = try? JSONDecoder().decode(AppConfiguration.self, from: data)
-        else {
-            return AppConfiguration()
-        }
-        return decoded
+        try AppConfigurationStore.save(configuration)
     }
 
     private var hasSavedRegistration: Bool {
         switch configuration.syncDestination {
+        case .directTRMNL:
+            return KeychainStore.load(.trmnlWebhookURL) != nil
         case .homeAssistant:
             return configuration.registration != nil && configuration.instanceURL != nil
         case .selfHostedBridge:
@@ -262,5 +307,15 @@ final class AppModel: ObservableObject {
                 && configuration.bridgeURL != nil
                 && KeychainStore.load(.selfHostedDeviceToken) != nil
         }
+    }
+
+    private var observerSyncDelaySeconds: Double {
+        guard configuration.syncDestination == .directTRMNL else {
+            return 15
+        }
+        guard let lastSuccessfulSync = configuration.lastSuccessfulSync else {
+            return 15
+        }
+        return max(15, 300 - Date().timeIntervalSince(lastSuccessfulSync))
     }
 }

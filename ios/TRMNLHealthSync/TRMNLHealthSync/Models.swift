@@ -2,6 +2,7 @@ import Foundation
 import UIKit
 
 enum SyncDestination: String, Codable, CaseIterable, Identifiable {
+    case directTRMNL = "direct_trmnl"
     case homeAssistant = "home_assistant"
     case selfHostedBridge = "self_hosted_bridge"
 
@@ -9,6 +10,8 @@ enum SyncDestination: String, Codable, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
+        case .directTRMNL:
+            return "TRMNL Direct"
         case .homeAssistant:
             return "Home Assistant"
         case .selfHostedBridge:
@@ -18,6 +21,8 @@ enum SyncDestination: String, Codable, CaseIterable, Identifiable {
 
     var connectButtonLabel: String {
         switch self {
+        case .directTRMNL:
+            return "Connect TRMNL & Sync"
         case .homeAssistant:
             return "Connect Home Assistant & Sync"
         case .selfHostedBridge:
@@ -103,7 +108,7 @@ struct SelfHostedBridgeSyncResponse: Codable, Equatable {
 }
 
 struct AppConfiguration: Codable {
-    var syncDestination: SyncDestination = .homeAssistant
+    var syncDestination: SyncDestination = .directTRMNL
     var instanceURLString: String = ""
     var deviceName: String = DeviceIdentity.defaultDeviceName
     var registration: HomeAssistantRegistration?
@@ -141,7 +146,7 @@ struct AppConfiguration: Codable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         syncDestination =
             try container.decodeIfPresent(SyncDestination.self, forKey: .syncDestination)
-            ?? .homeAssistant
+            ?? .directTRMNL
         instanceURLString =
             try container.decodeIfPresent(String.self, forKey: .instanceURLString) ?? ""
         deviceName =
@@ -177,6 +182,9 @@ struct HealthSnapshot: Codable, Equatable {
     let standHours: Int
     let standGoalHours: Int
     let standPercent: Int
+    let latestHeartRateBPM: Int
+    let sleepHours: Double
+    let latestWorkout: LatestWorkout?
 
     var capturedAtISO8601: String {
         ISO8601DateFormatter().string(from: capturedAt)
@@ -189,7 +197,7 @@ struct HealthSnapshot: Codable, Equatable {
     }
 
     var snapshotAttributes: [String: Any] {
-        [
+        var attributes: [String: Any] = [
             "captured_at": capturedAtISO8601,
             "date_label": dateLabel,
             "device_name": deviceName,
@@ -207,7 +215,13 @@ struct HealthSnapshot: Codable, Equatable {
             "stand_hours": standHours,
             "stand_goal_hours": standGoalHours,
             "stand_percent": standPercent,
+            "latest_heart_rate_bpm": latestHeartRateBPM,
+            "sleep_hours": rounded(sleepHours, digits: 1),
         ]
+        if let latestWorkout {
+            attributes["latest_workout"] = latestWorkout.snapshotAttributes
+        }
+        return attributes
     }
 
     var registrationPayloads: [[String: Any]] {
@@ -297,9 +311,114 @@ struct HealthSnapshot: Codable, Equatable {
         }
     }
 
+    var trmnlMergeVariables: TRMNLMergeVariables {
+        TRMNLMergeVariables(
+            profileName: profileName,
+            deviceName: deviceName,
+            capturedAt: capturedAtISO8601,
+            syncTimeLabel: capturedAt.formatted(date: .omitted, time: .shortened),
+            dateLabel: dateLabel,
+            rings: TRMNLRings(
+                move: moveKilocalories,
+                moveGoal: moveGoalKilocalories,
+                movePercent: movePercent,
+                exercise: exerciseMinutes,
+                exerciseGoal: exerciseGoalMinutes,
+                exercisePercent: exercisePercent,
+                stand: standHours,
+                standGoal: standGoalHours,
+                standPercent: standPercent
+            ),
+            activity: TRMNLActivity(
+                steps: steps,
+                distanceKilometers: rounded(distanceKilometers, digits: 2),
+                distanceMiles: rounded(distanceMiles, digits: 2),
+                flightsClimbed: flightsClimbed
+            ),
+            health: TRMNLHealth(
+                latestHeartRateBPM: latestHeartRateBPM,
+                sleepHours: rounded(sleepHours, digits: 1),
+                latestWorkout: latestWorkout.map {
+                    TRMNLWorkout(
+                        activityType: $0.activityType,
+                        startDate: ISO8601DateFormatter().string(from: $0.startDate),
+                        durationSeconds: Int($0.durationSeconds.rounded()),
+                        totalEnergyBurnedKilocalories: Int($0.totalEnergyBurnedKilocalories.rounded())
+                    )
+                }
+            )
+        )
+    }
+
     private func rounded(_ value: Double, digits: Int) -> Double {
         let multiplier = pow(10.0, Double(digits))
         return (value * multiplier).rounded() / multiplier
+    }
+}
+
+struct LatestWorkout: Codable, Equatable {
+    let activityType: String
+    let startDate: Date
+    let durationSeconds: Double
+    let totalEnergyBurnedKilocalories: Double
+
+    var snapshotAttributes: [String: Any] {
+        [
+            "activity_type": activityType,
+            "start_date": ISO8601DateFormatter().string(from: startDate),
+            "duration_seconds": Int(durationSeconds.rounded()),
+            "total_energy_burned_kcal": Int(totalEnergyBurnedKilocalories.rounded()),
+        ]
+    }
+}
+
+struct TRMNLMergeVariables: Encodable {
+    let profileName: String
+    let deviceName: String
+    let capturedAt: String
+    let syncTimeLabel: String
+    let dateLabel: String
+    let rings: TRMNLRings
+    let activity: TRMNLActivity
+    let health: TRMNLHealth
+}
+
+struct TRMNLHealth: Encodable {
+    let latestHeartRateBPM: Int
+    let sleepHours: Double
+    let latestWorkout: TRMNLWorkout?
+}
+
+struct TRMNLWorkout: Encodable {
+    let activityType: String
+    let startDate: String
+    let durationSeconds: Int
+    let totalEnergyBurnedKilocalories: Int
+}
+
+struct TRMNLRings: Encodable {
+    let move: Int
+    let moveGoal: Int
+    let movePercent: Int
+    let exercise: Int
+    let exerciseGoal: Int
+    let exercisePercent: Int
+    let stand: Int
+    let standGoal: Int
+    let standPercent: Int
+}
+
+struct TRMNLActivity: Encodable {
+    let steps: Int
+    let distanceKilometers: Double
+    let distanceMiles: Double
+    let flightsClimbed: Int
+
+    enum CodingKeys: String, CodingKey {
+        case steps
+        case distanceKilometers = "distance_km"
+        case distanceMiles = "distance_mi"
+        case flightsClimbed = "flights_climbed"
     }
 }
 
@@ -332,6 +451,8 @@ enum DeviceIdentity {
 }
 
 enum AppModelError: LocalizedError {
+    case invalidTRMNLWebhookURL
+    case missingTRMNLWebhookURL
     case invalidInstanceURL
     case missingAccessToken
     case missingRegistration
@@ -342,6 +463,10 @@ enum AppModelError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
+        case .invalidTRMNLWebhookURL:
+            return "Enter a valid TRMNL Private Plugin webhook URL."
+        case .missingTRMNLWebhookURL:
+            return "Connect a TRMNL Private Plugin webhook before running this sync."
         case .invalidInstanceURL:
             return "Enter a valid Home Assistant URL."
         case .missingAccessToken:
@@ -370,6 +495,17 @@ extension String {
         }
 
         return URL(string: "http://\(trimmed)")
+    }
+}
+
+extension URL {
+    var isTRMNLPrivatePluginWebhookURL: Bool {
+        scheme == "https"
+            && host == "trmnl.com"
+            && pathComponents.count == 4
+            && pathComponents[1] == "api"
+            && pathComponents[2] == "custom_plugins"
+            && !pathComponents[3].isEmpty
     }
 }
 

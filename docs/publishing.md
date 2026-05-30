@@ -1,84 +1,31 @@
 # Publishing Roadmap
 
-This repo is now structured around a self-hosted publication path instead of a vendor-hosted health-data cloud.
+## Product story
 
-## Phase 1: GitHub + TRMNL-ready assets
+The publishable setup is intentionally small:
 
-Implemented:
+1. Install `TRMNLHealthSync`.
+2. Create or install a webhook-strategy Private Plugin.
+3. Connect the webhook once in the iPhone app.
+4. Optionally schedule `Sync Apple Health` from Shortcuts.
 
-- public GitHub repo structure
-- TRMNL Liquid markup for all four recipe view sizes
-- TRMNL recipe form fields with the required `author_bio` and `copyable_webhook_url` treatments
-- setup docs for Home Assistant and standalone server
-
-Manual work still required:
-
-- final README polish
-- screenshots for the marketplace listing
-- TRMNL marketplace submission itself
+The app sends one compact HealthKit snapshot directly to TRMNL. Home Assistant
+and the standalone bridge remain optional paths.
 
 ## TRMNL recipe publisher bundle
 
-Use these files when filling out the TRMNL publisher:
+- `trmnl/apple-health-dashboard.fields.yaml`
+- `trmnl/apple-health-dashboard.liquid`
+- `trmnl/apple-health-dashboard.half_horizontal.liquid`
+- `trmnl/apple-health-dashboard.half_vertical.liquid`
+- `trmnl/apple-health-dashboard.quadrant.liquid`
+- `trmnl/apple-health-dashboard.transform.js`
 
-- `trmnl/apple-health-dashboard.fields.yaml` for the Custom Fields YAML
-- `trmnl/apple-health-dashboard.liquid` for the `full` layout
-- `trmnl/apple-health-dashboard.half_horizontal.liquid` for the `half_horizontal` layout
-- `trmnl/apple-health-dashboard.half_vertical.liquid` for the `half_vertical` layout
-- `trmnl/apple-health-dashboard.quadrant.liquid` for the `quadrant` layout
+The four layouts are designed for e-ink output and render rings, daily metrics,
+and the latest workout without relying on another data source.
 
-The markup intentionally avoids TRMNL's auto-applied `full`, `half_horizontal`, `half_vertical`, and `quadrant` wrapper classes, and uses framework layout classes plus SVG attributes instead of a large custom CSS block.
+## Manual work remaining
 
-## Phase 2: Regular self-hosted path
-
-Implemented:
-
-- HACS integration for Home Assistant users
-- standalone Docker-friendly bridge for non-Home-Assistant users
-- iPhone app support for both sync destinations
-
-Manual work still required:
-
-- packaged Docker image publishing
-- optional install scripts beyond `docker compose`
-
-## Phase 3: Tweaked productization path
-
-This repo intentionally does **not** assume a vendor-hosted backend.
-
-Instead, the publishable product story is:
-
-- user runs Home Assistant or the standalone bridge
-- iPhone app syncs only to infrastructure selected by the user
-- the local server pushes the snapshot to TRMNL
-
-That keeps health data custody on the user’s side while still allowing you to publish the TRMNL plugin and the iPhone client.
-
-## Phase 4: App Store readiness
-
-Implemented in code:
-
-- only the HealthKit reads required for rings, steps, distance, flights, move, exercise, and stand
-- no clinical Health Records entitlement
-- no vendor-hosted health-data backend required by the architecture
-
-Still required outside the repo:
-
-- an App Store Connect app record
-- screenshots, metadata, and category selection
-- a published privacy policy URL
-- a final App Review pass against the exact binary you submit
-
-## App Store policy posture
-
-The current design is strongest when presented as:
-
-- a wellness / health-display companion
-- user-directed syncing to the user’s own Home Assistant instance or self-hosted bridge
-- no advertising, profiling, or resale of HealthKit data
-
-Avoid positioning it as:
-
-- a medical device
-- a diagnostic app
-- a cloud health-data platform
+- create marketplace screenshots
+- submit the TRMNL recipe
+- optionally publish a packaged Docker image for self-hosted bridge users
