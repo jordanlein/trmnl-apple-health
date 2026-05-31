@@ -21,9 +21,9 @@ final class AppModel: ObservableObject {
 
     private var configuration: AppConfiguration
     private let healthKitStore = HealthKitStore()
-    private let directTRMNLClient = DirectTRMNLClient()
     private let homeAssistantClient = HomeAssistantClient()
     private let selfHostedBridgeClient = SelfHostedBridgeClient()
+    private let destinationSyncService = DestinationSyncService()
     private var observersInstalled = false
     private var observerSyncTask: Task<Void, Never>?
     private var hasRegisteredSensors = false
@@ -143,77 +143,18 @@ final class AppModel: ObservableObject {
     }
 
     private func syncNow(reason: String) async throws {
-        let snapshot = try await healthKitStore.fetchDailySnapshot(deviceName: deviceNameInput)
-        lastSnapshot = snapshot
+        let shouldRegisterHomeAssistantSensors =
+            configuration.syncDestination == .homeAssistant && !hasRegisteredSensors
+        let result = try await destinationSyncService.sync(
+            registerHomeAssistantSensors: shouldRegisterHomeAssistantSensors
+        )
 
-        switch configuration.syncDestination {
-        case .directTRMNL:
-            guard
-                let webhookValue = KeychainStore.load(.trmnlWebhookURL),
-                let webhookURL = webhookValue.normalizedURL,
-                webhookURL.isTRMNLPrivatePluginWebhookURL
-            else {
-                throw AppModelError.missingTRMNLWebhookURL
-            }
-            try await directTRMNLClient.updateSnapshot(
-                webhookURL: webhookURL,
-                snapshot: snapshot
-            )
-            statusMessage = "Last sync: \(snapshot.capturedAt.formatted(date: .omitted, time: .shortened)) (\(reason), pushed)"
-
-        case .homeAssistant:
-            guard configuration.registration != nil else {
-                throw AppModelError.missingRegistration
-            }
-
-            if !hasRegisteredSensors {
-                try await homeAssistantClient.registerSensors(
-                    configuration: configuration,
-                    snapshot: snapshot
-                )
-                hasRegisteredSensors = true
-            }
-
-            try await homeAssistantClient.updateSensors(
-                configuration: configuration,
-                snapshot: snapshot
-            )
-
-        case .selfHostedBridge:
-            guard
-                configuration.bridgeRegistration != nil,
-                let bridgeURL = configuration.bridgeURL
-            else {
-                throw AppModelError.missingBridgeRegistration
-            }
-            guard
-                let deviceToken = KeychainStore.load(.selfHostedDeviceToken),
-                !deviceToken.isEmpty
-            else {
-                throw AppModelError.missingBridgeRegistration
-            }
-
-            let result = try await selfHostedBridgeClient.updateSnapshot(
-                serverURL: bridgeURL,
-                deviceToken: deviceToken,
-                snapshot: snapshot,
-                trmnlWebhookURL: configuration.trmnlWebhookURLString
-            )
-
-            if result.trmnlWebhookConfigured {
-                statusMessage = result.pushedToTRMNL
-                    ? "Last sync: \(snapshot.capturedAt.formatted(date: .omitted, time: .shortened)) (\(reason), pushed)"
-                    : "Last sync: \(snapshot.capturedAt.formatted(date: .omitted, time: .shortened)) (\(reason), stored)"
-            } else {
-                statusMessage = "Last sync: \(snapshot.capturedAt.formatted(date: .omitted, time: .shortened)) (\(reason), webhook not configured)"
-            }
+        lastSnapshot = result.snapshot
+        configuration = AppConfigurationStore.load()
+        if shouldRegisterHomeAssistantSensors {
+            hasRegisteredSensors = true
         }
-
-        configuration.lastSuccessfulSync = .now
-        try saveConfiguration()
-        if configuration.syncDestination == .homeAssistant {
-            statusMessage = "Last sync: \(snapshot.capturedAt.formatted(date: .omitted, time: .shortened)) (\(reason))"
-        }
+        statusMessage = result.statusMessage(reason: reason)
     }
 
     private func installObserversIfNeeded() {
