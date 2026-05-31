@@ -94,43 +94,38 @@ extension SyncDestination {
         }
     }
 
-    var setupSteps: [SetupStep] {
+    var connectionFieldTips: [SetupStep] {
         switch self {
         case .directTRMNL:
             return [
                 SetupStep(
-                    systemImage: "square.and.arrow.down",
-                    title: "Install the Apple Health Recipe",
-                    detail: "In TRMNL, install the published Apple Health Recipe. Use a webhook Private Plugin only as a developer fallback before the Recipe is available."
-                ),
-                SetupStep(
                     systemImage: "link",
-                    title: "Copy and paste one URL",
-                    detail: "Copy the Recipe webhook URL, paste it here, and connect once so the app can save it securely."
+                    title: "TRMNL webhook URL",
+                    detail: "Paste the private webhook URL from your installed Apple Health Recipe. It tells the app which TRMNL dashboard should receive your snapshot."
                 ),
                 SetupStep(
-                    systemImage: "clock.arrow.circlepath",
-                    title: "Automate one sync action",
-                    detail: "In Shortcuts, run this app's Sync Apple Health action whenever you want to refresh your TRMNL display."
+                    systemImage: "tag",
+                    title: "Device label",
+                    detail: "Use a friendly name such as Jordan's iPhone. This label appears in the snapshot and can be changed later."
                 )
             ]
 
         case .homeAssistant:
             return [
                 SetupStep(
-                    systemImage: "shippingbox.fill",
-                    title: "Install the HACS bridge",
-                    detail: "Download TRMNL Apple Health Bridge through HACS and restart Home Assistant."
+                    systemImage: "link",
+                    title: "Instance URL",
+                    detail: "Enter the Home Assistant address that opens successfully on this iPhone, such as http://homeassistant.local:8123 or your remote URL."
                 ),
                 SetupStep(
                     systemImage: "person.badge.key.fill",
-                    title: "Publish Health Snapshot",
-                    detail: "Create a long-lived Home Assistant token, paste it here with your URL, and connect. The app publishes a Health Snapshot sensor."
+                    title: "Long-lived access token",
+                    detail: "Paste the token from your Home Assistant profile. Home Assistant shows it only once, and this app stores it securely."
                 ),
                 SetupStep(
-                    systemImage: "rectangle.connected.to.line.below",
-                    title: "Map the sensor to TRMNL",
-                    detail: "Add TRMNL Health Bridge in Home Assistant, select Health Snapshot, and paste your TRMNL Recipe webhook URL."
+                    systemImage: "tag",
+                    title: "Device label",
+                    detail: "Use a recognizable name so the Health Snapshot sensor is easier to identify in Home Assistant."
                 )
             ]
 
@@ -138,18 +133,23 @@ extension SyncDestination {
             return [
                 SetupStep(
                     systemImage: "server.rack",
-                    title: "Deploy the bridge",
-                    detail: "Run the included Docker bridge service on a server you maintain and keep its setup token handy."
+                    title: "Bridge URL",
+                    detail: "Enter the address of the Docker bridge dashboard, usually something like http://192.168.x.x:8421."
+                ),
+                SetupStep(
+                    systemImage: "key",
+                    title: "Setup token",
+                    detail: "Paste the private TRMNL_HEALTH_SETUP_TOKEN value from your docker-compose.yml file."
                 ),
                 SetupStep(
                     systemImage: "link",
-                    title: "Enter both URLs",
-                    detail: "Paste the bridge URL, setup token, and the webhook URL from your TRMNL Private Plugin."
+                    title: "TRMNL webhook URL",
+                    detail: "Paste the private webhook URL from your installed Apple Health Recipe so the bridge can publish snapshots to TRMNL."
                 ),
                 SetupStep(
-                    systemImage: "checkmark.shield.fill",
-                    title: "Register this device",
-                    detail: "Connect once. The bridge stores the TRMNL destination and accepts future activity snapshots."
+                    systemImage: "tag",
+                    title: "Device label",
+                    detail: "Use a friendly name for this iPhone in the bridge dashboard."
                 )
             ]
         }

@@ -21,9 +21,11 @@ struct OnboardingView: View {
                         .tag(1)
 
                     DestinationGuidePage(destination: model.syncDestinationInput)
+                        .id(model.syncDestinationInput)
                         .tag(2)
 
                     ConnectionPage(model: model)
+                        .id(model.syncDestinationInput)
                         .tag(3)
 
                     CompletionPage(destination: model.syncDestinationInput)
@@ -163,17 +165,43 @@ private struct DestinationGuidePage: View {
                 tint: destination.tint
             )
 
+            OnboardingDifficultyBanner(destination: destination)
+
             DestinationIllustration(destination: destination)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
 
-            VStack(alignment: .leading, spacing: 18) {
-                ForEach(destination.setupSteps) { step in
-                    SetupStepRow(step: step, tint: destination.tint)
-                }
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Follow these steps in order")
+                    .font(.headline)
+                Text("This is the complete setup path for \(destination.displayName). You can pause here and reopen the same guide later from Help.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
             }
-            .padding()
-            .background(.background, in: RoundedRectangle(cornerRadius: 18))
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            ForEach(destination.detailedSetupSections) { section in
+                VStack(alignment: .leading, spacing: 14) {
+                    Text(section.title)
+                        .font(.headline)
+
+                    if let detail = section.detail {
+                        Text(detail)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    ForEach(Array(section.steps.enumerated()), id: \.element.id) { index, step in
+                        OnboardingNumberedStep(
+                            number: index + 1,
+                            step: step,
+                            tint: destination.tint
+                        )
+                    }
+                }
+                .padding()
+                .background(.background, in: RoundedRectangle(cornerRadius: 18))
+            }
         }
     }
 }
@@ -189,6 +217,17 @@ private struct ConnectionPage: View {
                 detail: "Enter the details for \(model.syncDestinationInput.displayName). The app saves the connection locally for future manual and Shortcut syncs.",
                 tint: model.syncDestinationInput.tint
             )
+
+            VStack(alignment: .leading, spacing: 14) {
+                Text("What you'll enter")
+                    .font(.headline)
+
+                ForEach(model.syncDestinationInput.connectionFieldTips) { tip in
+                    SetupStepRow(step: tip, tint: model.syncDestinationInput.tint)
+                }
+            }
+            .padding()
+            .background(.background, in: RoundedRectangle(cornerRadius: 18))
 
             VStack(alignment: .leading, spacing: 14) {
                 DestinationConfigurationFields(model: model)
@@ -221,6 +260,53 @@ private struct ConnectionPage: View {
             Text("You can continue reading the guide before connecting. The same fields remain available later in Settings.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
+        }
+    }
+}
+
+private struct OnboardingDifficultyBanner: View {
+    let destination: SyncDestination
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "gauge.with.dots.needle.33percent")
+                .font(.title3)
+                .foregroundStyle(destination.tint)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(destination.difficulty.badgeText)
+                    .font(.headline)
+                Text(destination.difficulty.detail)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+        .background(.background, in: RoundedRectangle(cornerRadius: 18))
+    }
+}
+
+private struct OnboardingNumberedStep: View {
+    let number: Int
+    let step: SetupStep
+    let tint: Color
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Text(number.formatted())
+                .font(.caption.bold())
+                .foregroundStyle(.white)
+                .frame(width: 24, height: 24)
+                .background(tint, in: Circle())
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(step.title)
+                    .font(.subheadline.weight(.semibold))
+                Text(step.detail)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
         }
     }
 }
