@@ -70,14 +70,17 @@ Shortcuts automation.
 
 ## Recommended setup
 
-1. In the TRMNL web app, create a `Private Plugin` using the `Webhook` strategy.
-2. In the TRMNL Private Plugin editor, paste the matching layout templates from
-   `trmnl/`.
-3. Build and install `TRMNLHealthSync`, choose `TRMNL Direct`, paste the
-   Private Plugin webhook URL, and tap `Connect TRMNL & Sync`.
+1. In the TRMNL web app, install the published Apple Health Recipe.
+2. Open the installed Recipe settings and copy its
+   `TRMNL Health Sync Webhook URL`.
+3. Install `TRMNLHealthSync`, choose `TRMNL Direct`, paste the Recipe webhook
+   URL, and tap `Connect TRMNL & Sync`.
 4. Approve the requested HealthKit permissions.
 5. Optionally create a Shortcuts automation that runs
    `TRMNL Health Sync -> Sync Apple Health`.
+
+Before the public Recipe is available, developers can create a webhook-strategy
+Private Plugin manually and paste the matching layout templates from `trmnl/`.
 
 ## Requirements
 
@@ -101,9 +104,12 @@ Shortcuts automation.
 - Xcode
 - An Apple Developer account if you want to install broadly, TestFlight, or publish to the App Store
 
-## Optional self-hosted setup
+## Developer and optional self-hosted setup
 
-## 1. Create the TRMNL plugin
+## 1. Create the TRMNL plugin fallback
+
+Ordinary users should install the published Recipe. Use these steps only before
+publication or while developing markup changes.
 
 1. In TRMNL, create a new `Private Plugin`.
 2. Choose `Webhook` as the data strategy.

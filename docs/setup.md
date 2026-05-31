@@ -2,23 +2,35 @@
 
 ## Recommended: direct TRMNL sync
 
-Use the `TRMNLHealthSync` iPhone app with one webhook-strategy Private Plugin.
+Use the `TRMNLHealthSync` iPhone app with the published Apple Health Recipe.
+This is the easiest route and does not require Home Assistant or a server.
 
-1. In TRMNL, go to `Plugins -> Private Plugin -> New`.
-2. Create a plugin with the `Webhook` strategy.
-3. Open `Edit Markup` and paste the four matching templates from `trmnl/`.
-4. Save the plugin so TRMNL generates its webhook URL.
-5. Build and install `TRMNLHealthSync`.
-6. In the app, choose `TRMNL Direct`, paste the webhook URL, and tap
+1. In the TRMNL web app, open `Plugins`.
+2. Scroll to `Recipes`, search for the Apple Health Recipe, and install it.
+3. Open the installed Recipe settings and copy its `TRMNL Health Sync Webhook URL`.
+4. Install and open `TRMNLHealthSync` on your iPhone.
+5. In the app, choose `TRMNL Direct`, paste the webhook URL, and tap
    `Connect TRMNL & Sync`.
-7. Approve the HealthKit permissions requested by iOS.
+6. Approve the HealthKit permissions requested by iOS.
+7. Confirm the TRMNL plugin preview shows your rings and metrics.
 8. Optionally add `TRMNL Health Sync -> Sync Apple Health` to a Shortcuts
    automation and turn off `Ask Before Running`.
 
 The app reads one compact daily snapshot from Apple Health and sends it
 directly to TRMNL. No second iPhone app or server is required.
 
-## Private Plugin templates
+## Developer fallback: Private Plugin templates
+
+Use this only before the Recipe is publicly available or while developing
+layout changes. TRMNL says creating a Private Plugin requires the Developer
+add-on or a BYOD license.
+
+1. In TRMNL, go to `Plugins -> Private Plugin -> New`.
+2. Create a plugin with the `Webhook` strategy.
+3. Open `Edit Markup`.
+4. Paste the matching templates listed below.
+5. Save the plugin so TRMNL generates its webhook URL.
+6. Copy that URL into the iPhone app.
 
 Use:
 
@@ -41,20 +53,30 @@ Use a bridge only when you intentionally want another system in the middle:
 
 ### Home Assistant
 
-1. Install `TRMNL Health Bridge` through HACS.
-2. Restart Home Assistant.
-3. Add the integration from `Settings -> Devices & Services`.
-4. In the iPhone app, choose `Home Assistant`, enter the base URL and
-   long-lived token, and connect.
-5. Select the resulting `Health Snapshot` sensor in the integration.
+1. Install the Apple Health Recipe in TRMNL and copy its webhook URL.
+2. In HACS, open the three-dot menu and choose `Custom repositories`.
+3. Add `https://github.com/jordanlein/trmnl-apple-health` as an `Integration`.
+4. Download `TRMNL Apple Health Bridge` and restart Home Assistant.
+5. In your Home Assistant user profile, create a long-lived access token.
+6. In the iPhone app, choose `Home Assistant`, enter the base URL and token,
+   then tap `Connect Home Assistant & Sync`.
+7. In Home Assistant, go to `Settings -> Devices & services -> Add integration`
+   and add `TRMNL Health Bridge`.
+8. Select the resulting `Health Snapshot` sensor, paste the TRMNL webhook URL,
+   and save.
 
 ### Self-hosted bridge
 
-1. Copy `docker-compose.example.yml` to `docker-compose.yml`.
-2. Set a private `TRMNL_HEALTH_SETUP_TOKEN`.
-3. Start the bridge with `docker compose up --build -d`.
-4. In the iPhone app, choose `Self-Hosted Bridge`, then enter the bridge URL,
+1. Install the Apple Health Recipe in TRMNL and copy its webhook URL.
+2. Clone this repository onto a server with Docker Compose.
+3. Copy `docker-compose.example.yml` to `docker-compose.yml`.
+4. Set a private `TRMNL_HEALTH_SETUP_TOKEN`.
+5. Start the bridge with `docker compose up --build -d`.
+6. Open `http://<your-server>:8421` to confirm the bridge dashboard loads.
+7. In the iPhone app, choose `Self-Hosted Bridge`, then enter the bridge URL,
    setup token, and TRMNL webhook URL.
+8. Tap `Connect Bridge & Sync`, then confirm data appears in the bridge
+   dashboard and the TRMNL plugin preview.
 
 See [standalone-server.md](standalone-server.md) for the bridge API and
 environment variables.

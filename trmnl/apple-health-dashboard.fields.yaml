@@ -8,3 +8,11 @@
     webhook-strategy Private Plugin.
   github_url: https://github.com/jordanlein/trmnl-apple-health
   learn_more_url: https://github.com/jordanlein/trmnl-apple-health#readme
+
+- keyname: trmnl_health_sync_webhook_url
+  field_type: copyable_webhook_url
+  name: TRMNL Health Sync Webhook URL
+  description: >
+    Copy this URL and paste it into TRMNL Health Sync on your iPhone after
+    choosing TRMNL Direct. Keep it private because it can publish data to this
+    dashboard.
