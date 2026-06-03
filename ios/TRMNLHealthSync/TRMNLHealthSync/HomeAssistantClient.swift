@@ -2,7 +2,7 @@ import Foundation
 import UIKit
 
 struct HomeAssistantClient {
-    private let session = URLSession.shared
+    private let session = URLSession.trmnlSync
 
     @MainActor
     func register(
@@ -30,7 +30,7 @@ struct HomeAssistantClient {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try JSONSerialization.data(withJSONObject: payload)
 
-        let (data, response) = try await session.data(for: request)
+        let (data, response) = try await session.trmnlData(for: request)
         try validate(response: response, data: data)
         return try JSONDecoder().decode(HomeAssistantRegistration.self, from: data)
     }
@@ -82,7 +82,7 @@ struct HomeAssistantClient {
                 request.httpMethod = "POST"
                 request.setValue("application/json", forHTTPHeaderField: "Content-Type")
                 request.httpBody = try JSONSerialization.data(withJSONObject: jsonObject)
-                let (data, response) = try await session.data(for: request)
+                let (data, response) = try await session.trmnlData(for: request)
                 try validate(response: response, data: data)
                 return data
             } catch {

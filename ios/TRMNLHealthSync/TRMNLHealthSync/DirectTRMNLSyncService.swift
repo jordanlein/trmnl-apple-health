@@ -32,16 +32,23 @@ enum DestinationSyncOutcome {
     }
 }
 
+enum HealthSnapshotSource: Equatable {
+    case fresh
+    case cached
+}
+
 struct DestinationSyncResult {
     let snapshot: HealthSnapshot
     let outcome: DestinationSyncOutcome
+    let snapshotSource: HealthSnapshotSource
 
     func statusMessage(reason: String) -> String {
         let formattedDate = snapshot.capturedAt.formatted(date: .omitted, time: .shortened)
+        let sourceSuffix = snapshotSource == .cached ? ", cached health data" : ""
         guard let statusSuffix = outcome.statusSuffix else {
-            return "Last sync: \(formattedDate) (\(reason))"
+            return "Last sync: \(formattedDate) (\(reason)\(sourceSuffix))"
         }
-        return "Last sync: \(formattedDate) (\(reason), \(statusSuffix))"
+        return "Last sync: \(formattedDate) (\(reason), \(statusSuffix)\(sourceSuffix))"
     }
 }
 
@@ -52,12 +59,15 @@ struct DestinationSyncService {
     private let selfHostedBridgeClient = SelfHostedBridgeClient()
 
     func sync(
-        registerHomeAssistantSensors: Bool = false
+        registerHomeAssistantSensors: Bool = false,
+        allowsCachedHealthSnapshot: Bool = false
     ) async throws -> DestinationSyncResult {
         var configuration = AppConfigurationStore.load()
-        let snapshot = try await healthKitStore.fetchDailySnapshot(
-            deviceName: configuration.deviceName
+        let snapshotResult = try await healthSnapshot(
+            configuration: configuration,
+            allowsCachedHealthSnapshot: allowsCachedHealthSnapshot
         )
+        let snapshot = snapshotResult.snapshot
 
         let outcome: DestinationSyncOutcome
         switch configuration.syncDestination {
@@ -121,7 +131,36 @@ struct DestinationSyncService {
         }
 
         configuration.lastSuccessfulSync = .now
+        configuration.lastSnapshot = snapshot
         try AppConfigurationStore.save(configuration)
-        return DestinationSyncResult(snapshot: snapshot, outcome: outcome)
+        return DestinationSyncResult(
+            snapshot: snapshot,
+            outcome: outcome,
+            snapshotSource: snapshotResult.source
+        )
+    }
+
+    private func healthSnapshot(
+        configuration: AppConfiguration,
+        allowsCachedHealthSnapshot: Bool
+    ) async throws -> (snapshot: HealthSnapshot, source: HealthSnapshotSource) {
+        do {
+            let snapshot = try await healthKitStore.fetchDailySnapshot(
+                deviceName: configuration.deviceName
+            )
+            var updatedConfiguration = configuration
+            updatedConfiguration.lastSnapshot = snapshot
+            try? AppConfigurationStore.save(updatedConfiguration)
+            return (snapshot, .fresh)
+        } catch {
+            guard
+                allowsCachedHealthSnapshot,
+                let cachedSnapshot = configuration.lastSnapshot,
+                Calendar.current.isDateInToday(cachedSnapshot.capturedAt)
+            else {
+                throw error
+            }
+            return (cachedSnapshot, .cached)
+        }
     }
 }

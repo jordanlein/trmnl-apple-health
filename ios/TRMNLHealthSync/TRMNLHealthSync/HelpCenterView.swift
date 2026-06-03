@@ -279,6 +279,15 @@ private struct ShortcutsHelpView: View {
                         .foregroundStyle(.secondary)
                 }
                 .cardStyle()
+
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Avoid local-network surprises")
+                        .font(.headline)
+                    Text("If your destination uses a local Home Assistant or bridge URL, such as 192.168.x.x or homeassistant.local, Shortcuts can only reach it while this iPhone is on that Wi-Fi or VPN. For automations that should work away from home, use TRMNL Direct or configure a reachable Home Assistant remote URL.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+                .cardStyle()
             }
             .padding()
         }
@@ -418,6 +427,10 @@ private struct FAQView: View {
             FAQRow(
                 question: "Can I sync without Shortcuts?",
                 answer: "Yes. Use Sync Now in the Activity tab. Shortcuts simply makes refreshes automatic."
+            )
+            FAQRow(
+                question: "Why does my Shortcut fail away from home?",
+                answer: "Home Assistant and Self-Hosted Bridge destinations often use local addresses that only work on your home Wi-Fi. Use TRMNL Direct, Home Assistant Cloud, a remote Home Assistant URL, or a VPN if the automation should run from cellular or another network."
             )
             FAQRow(
                 question: "Where can I change the connection?",

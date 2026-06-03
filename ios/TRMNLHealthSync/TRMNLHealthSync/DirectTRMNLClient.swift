@@ -1,7 +1,55 @@
 import Foundation
 
+extension URLSession {
+    static let trmnlSync: URLSession = {
+        let configuration = URLSessionConfiguration.default
+        configuration.timeoutIntervalForRequest = 15
+        configuration.timeoutIntervalForResource = 25
+        configuration.waitsForConnectivity = false
+        return URLSession(configuration: configuration)
+    }()
+
+    func trmnlData(for request: URLRequest, attempts: Int = 2) async throws -> (Data, URLResponse) {
+        var lastError: Error?
+
+        for attempt in 1...max(1, attempts) {
+            do {
+                return try await data(for: request)
+            } catch {
+                lastError = error
+                guard attempt < attempts, error.isTransientNetworkFailure else {
+                    throw error
+                }
+
+                try await Task.sleep(nanoseconds: UInt64(attempt) * 750_000_000)
+            }
+        }
+
+        throw lastError ?? URLError(.unknown)
+    }
+}
+
+extension Error {
+    var isTransientNetworkFailure: Bool {
+        guard let urlError = self as? URLError else { return false }
+        switch urlError.code {
+        case .timedOut,
+            .networkConnectionLost,
+            .notConnectedToInternet,
+            .cannotFindHost,
+            .cannotConnectToHost,
+            .dnsLookupFailed,
+            .internationalRoamingOff,
+            .dataNotAllowed:
+            return true
+        default:
+            return false
+        }
+    }
+}
+
 struct DirectTRMNLClient {
-    private let session = URLSession.shared
+    private let session = URLSession.trmnlSync
 
     func updateSnapshot(webhookURL: URL, snapshot: HealthSnapshot) async throws {
         let payload = TRMNLWebhookRequest(mergeVariables: snapshot.trmnlMergeVariables)
@@ -11,7 +59,7 @@ struct DirectTRMNLClient {
         request.setValue("trmnl-health-sync-ios/0.3.0", forHTTPHeaderField: "User-Agent")
         request.httpBody = try JSONEncoder.trmnlHealthAPI.encode(payload)
 
-        let (data, response) = try await session.data(for: request)
+        let (data, response) = try await session.trmnlData(for: request)
         try validate(response: response, data: data)
     }
 

@@ -1,7 +1,7 @@
 import Foundation
 
 struct SelfHostedBridgeClient {
-    private let session = URLSession.shared
+    private let session = URLSession.trmnlSync
 
     func register(
         serverURL: URL,
@@ -26,7 +26,7 @@ struct SelfHostedBridgeClient {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try JSONEncoder.trmnlHealthAPI.encode(payload)
 
-        let (data, response) = try await session.data(for: request)
+        let (data, response) = try await session.trmnlData(for: request)
         try validate(response: response, data: data)
         return try JSONDecoder.trmnlHealthAPI.decode(SelfHostedBridgeRegistrationResponse.self, from: data)
     }
@@ -48,7 +48,7 @@ struct SelfHostedBridgeClient {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try JSONEncoder.trmnlHealthAPI.encode(payload)
 
-        let (data, response) = try await session.data(for: request)
+        let (data, response) = try await session.trmnlData(for: request)
         try validate(response: response, data: data)
         return try JSONDecoder.trmnlHealthAPI.decode(SelfHostedBridgeSyncResponse.self, from: data)
     }

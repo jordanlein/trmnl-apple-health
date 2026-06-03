@@ -39,6 +39,7 @@ final class AppModel: ObservableObject {
         trmnlWebhookURLInput =
             KeychainStore.load(.trmnlWebhookURL) ?? loaded.trmnlWebhookURLString
         deviceNameInput = loaded.deviceName
+        lastSnapshot = loaded.lastSnapshot
     }
 
     func bootstrap() async {

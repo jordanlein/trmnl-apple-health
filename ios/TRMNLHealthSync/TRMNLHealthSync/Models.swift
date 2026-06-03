@@ -116,6 +116,7 @@ struct AppConfiguration: Codable {
     var bridgeRegistration: SelfHostedBridgeRegistration?
     var trmnlWebhookURLString: String = ""
     var lastSuccessfulSync: Date?
+    var lastSnapshot: HealthSnapshot?
 
     var instanceURL: URL? {
         instanceURLString.normalizedURL
@@ -140,6 +141,7 @@ struct AppConfiguration: Codable {
         case bridgeRegistration
         case trmnlWebhookURLString
         case lastSuccessfulSync
+        case lastSnapshot
     }
 
     init(from decoder: Decoder) throws {
@@ -162,6 +164,8 @@ struct AppConfiguration: Codable {
             try container.decodeIfPresent(String.self, forKey: .trmnlWebhookURLString) ?? ""
         lastSuccessfulSync =
             try container.decodeIfPresent(Date.self, forKey: .lastSuccessfulSync)
+        lastSnapshot =
+            try container.decodeIfPresent(HealthSnapshot.self, forKey: .lastSnapshot)
     }
 }
 
