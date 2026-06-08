@@ -121,7 +121,12 @@ struct DestinationSyncService {
                 trmnlWebhookURL: configuration.trmnlWebhookURLString
             )
 
-            if !response.trmnlWebhookConfigured {
+            if response.trmnlWebhookConfigured,
+               !response.pushedToTRMNL,
+               let pushError = response.trmnlPushError,
+               !pushError.isEmpty {
+                throw AppModelError.trmnlPushFailed(pushError)
+            } else if !response.trmnlWebhookConfigured {
                 outcome = .selfHostedBridgeMissingWebhook
             } else if response.pushedToTRMNL {
                 outcome = .selfHostedBridgePush

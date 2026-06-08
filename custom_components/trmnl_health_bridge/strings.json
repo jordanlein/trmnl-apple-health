@@ -14,7 +14,8 @@
       }
     },
     "error": {
-      "invalid_url": "Enter a valid HTTP or HTTPS URL."
+      "invalid_url": "Enter a valid HTTP or HTTPS URL.",
+      "invalid_webhook_url": "Paste the TRMNL Private Plugin webhook URL. It should look like https://trmnl.com/api/custom_plugins/..."
     }
   },
   "options": {
@@ -30,7 +31,8 @@
       }
     },
     "error": {
-      "invalid_url": "Enter a valid HTTP or HTTPS URL."
+      "invalid_url": "Enter a valid HTTP or HTTPS URL.",
+      "invalid_webhook_url": "Paste the TRMNL Private Plugin webhook URL. It should look like https://trmnl.com/api/custom_plugins/..."
     }
   }
 }

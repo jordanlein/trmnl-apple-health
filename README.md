@@ -318,6 +318,15 @@ Update to the latest version of the repo in HACS and restart Home Assistant.
 
 You likely used `Webhook Image (Experimental)` instead of a normal `Webhook` plugin. Use a regular `Private Plugin` with the `Webhook` data strategy.
 
+### TRMNL says `Large payload received`
+
+TRMNL is receiving a large source payload before rendering the dashboard. The
+normal app payload is well under this limit, so this usually means the Private
+Plugin is polling a Home Assistant, Homebridge, or bridge endpoint instead of
+receiving updates through its TRMNL webhook URL. Use the `Webhook` strategy and
+paste only the `https://trmnl.com/api/custom_plugins/...` webhook URL into the
+app or bridge configuration.
+
 ### The iPhone app says the URL is invalid
 
 Use a full base URL when possible, for example:

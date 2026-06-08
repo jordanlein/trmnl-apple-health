@@ -215,18 +215,28 @@ final class AppModel: ObservableObject {
             throw AppModelError.missingBridgeSetupToken
         }
 
-        let normalizedWebhook = trmnlWebhookURLInput.trimmingCharacters(in: .whitespacesAndNewlines)
+        let webhookValue = trmnlWebhookURLInput.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedWebhook: String?
+        if webhookValue.isEmpty {
+            normalizedWebhook = nil
+        } else if let webhookURL = webhookValue.normalizedURL,
+                  webhookURL.isTRMNLPrivatePluginWebhookURL {
+            normalizedWebhook = webhookURL.absoluteString
+        } else {
+            throw AppModelError.invalidTRMNLWebhookURL
+        }
+
         let registration = try await selfHostedBridgeClient.register(
             serverURL: bridgeURL,
             setupToken: setupToken,
             deviceName: deviceNameInput,
-            trmnlWebhookURL: normalizedWebhook.isEmpty ? nil : normalizedWebhook
+            trmnlWebhookURL: normalizedWebhook
         )
 
         configuration.syncDestination = .selfHostedBridge
         configuration.bridgeURLString = bridgeURL.absoluteString
         configuration.bridgeRegistration = registration.persistedRegistration
-        configuration.trmnlWebhookURLString = normalizedWebhook
+        configuration.trmnlWebhookURLString = normalizedWebhook ?? ""
         configuration.deviceName = deviceNameInput
         try KeychainStore.save(setupToken, for: .selfHostedSetupToken)
         try KeychainStore.save(registration.deviceToken, for: .selfHostedDeviceToken)

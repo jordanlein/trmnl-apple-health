@@ -464,6 +464,7 @@ enum AppModelError: LocalizedError {
     case missingBridgeSetupToken
     case missingBridgeRegistration
     case healthDataUnavailable
+    case trmnlPushFailed(String)
 
     var errorDescription: String? {
         switch self {
@@ -485,6 +486,10 @@ enum AppModelError: LocalizedError {
             return "The app is not paired with the self-hosted bridge yet."
         case .healthDataUnavailable:
             return "Health data is not available on this device."
+        case .trmnlPushFailed(let message):
+            let trimmed = message.trimmingCharacters(in: .whitespacesAndNewlines)
+            let summary = trimmed.count > 220 ? String(trimmed.prefix(220)) + "..." : trimmed
+            return "The bridge stored the Health snapshot, but TRMNL rejected the Private Plugin update: \(summary)"
         }
     }
 }

@@ -44,6 +44,15 @@ The bundled serverless transform is only a compact normalizer for marketplace
 packaging. A private webhook plugin can leave its serverless language set to
 `None`.
 
+If TRMNL shows `Large payload received` or says the plugin is in a degraded
+state, the plugin is not receiving the compact webhook payload expected by this
+project. Recheck that the Private Plugin strategy is `Webhook` and that the
+iPhone app, Home Assistant bridge, or self-hosted bridge contains the TRMNL
+webhook URL that looks like `https://trmnl.com/api/custom_plugins/...`. Do not
+set the plugin to poll a Home Assistant, Homebridge, or bridge API endpoint
+directly unless you also add a Transform script that reduces that large response
+to the small Apple Health object used by the Liquid templates.
+
 ## Optional bridge paths
 
 Use a bridge only when you intentionally want another system in the middle:

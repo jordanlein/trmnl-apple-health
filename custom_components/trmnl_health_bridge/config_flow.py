@@ -31,6 +31,19 @@ def _looks_like_http_url(value: str) -> bool:
     return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
 
 
+def _looks_like_trmnl_webhook_url(value: str) -> bool:
+    parsed = urlparse(value)
+    path_parts = [part for part in parsed.path.split("/") if part]
+    return (
+        parsed.scheme == "https"
+        and parsed.netloc == "trmnl.com"
+        and len(path_parts) == 3
+        and path_parts[0] == "api"
+        and path_parts[1] == "custom_plugins"
+        and bool(path_parts[2])
+    )
+
+
 class TRMNLHealthBridgeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for TRMNL Health Bridge."""
 
@@ -52,6 +65,8 @@ class TRMNLHealthBridgeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             webhook_url = str(user_input[CONF_TRMNL_WEBHOOK_URL]).strip()
             if not _looks_like_http_url(webhook_url):
                 errors[CONF_TRMNL_WEBHOOK_URL] = "invalid_url"
+            elif not _looks_like_trmnl_webhook_url(webhook_url):
+                errors[CONF_TRMNL_WEBHOOK_URL] = "invalid_webhook_url"
             else:
                 await self.async_set_unique_id(
                     f"{webhook_url}:{user_input[CONF_SNAPSHOT_ENTITY_ID]}"
@@ -97,6 +112,8 @@ class TRMNLHealthBridgeOptionsFlow(config_entries.OptionsFlow):
             webhook_url = str(user_input[CONF_TRMNL_WEBHOOK_URL]).strip()
             if not _looks_like_http_url(webhook_url):
                 errors[CONF_TRMNL_WEBHOOK_URL] = "invalid_url"
+            elif not _looks_like_trmnl_webhook_url(webhook_url):
+                errors[CONF_TRMNL_WEBHOOK_URL] = "invalid_webhook_url"
             else:
                 return self.async_create_entry(
                     title="",
