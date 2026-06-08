@@ -23,6 +23,33 @@ struct SettingsView: View {
                 DestinationConfigurationFields(model: model)
             }
 
+            Section("Apple Health Access") {
+                Text(model.healthAccessStatusMessage)
+                    .foregroundStyle(.secondary)
+
+                Button {
+                    Task {
+                        await model.reviewHealthPermissions()
+                    }
+                } label: {
+                    Label("Review Health Permissions", systemImage: "heart.text.square")
+                }
+                .disabled(model.isBusy)
+
+                Button {
+                    Task {
+                        await model.checkHealthAccess()
+                    }
+                } label: {
+                    Label("Check Health Access", systemImage: "checkmark.seal")
+                }
+                .disabled(model.isBusy)
+
+                Text("To manually change access, open Health, then Sharing, then Apps, then TRMNL Health Sync.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+
             Section("Actions") {
                 Button(model.syncDestinationInput.connectButtonLabel) {
                     Task {
@@ -60,5 +87,8 @@ struct SettingsView: View {
             }
         }
         .navigationTitle("Settings")
+        .task {
+            await model.refreshHealthAccessStatus()
+        }
     }
 }

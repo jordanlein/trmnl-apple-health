@@ -10,21 +10,8 @@ final class HealthKitStore {
             throw AppModelError.healthDataUnavailable
         }
 
-        let readTypes: Set<HKObjectType> = [
-            HKObjectType.activitySummaryType(),
-            HKObjectType.quantityType(forIdentifier: .stepCount)!,
-            HKObjectType.quantityType(forIdentifier: .distanceWalkingRunning)!,
-            HKObjectType.quantityType(forIdentifier: .flightsClimbed)!,
-            HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!,
-            HKObjectType.quantityType(forIdentifier: .appleExerciseTime)!,
-            HKObjectType.quantityType(forIdentifier: .heartRate)!,
-            HKObjectType.categoryType(forIdentifier: .appleStandHour)!,
-            HKObjectType.categoryType(forIdentifier: .sleepAnalysis)!,
-            HKObjectType.workoutType(),
-        ]
-
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-            healthStore.requestAuthorization(toShare: [], read: readTypes) { success, error in
+            healthStore.requestAuthorization(toShare: [], read: Self.readTypes) { success, error in
                 if let error {
                     continuation.resume(throwing: error)
                     return
@@ -37,6 +24,55 @@ final class HealthKitStore {
             }
         }
     }
+
+    func authorizationRequestStatus() async throws -> HKAuthorizationRequestStatus {
+        guard HKHealthStore.isHealthDataAvailable() else {
+            throw AppModelError.healthDataUnavailable
+        }
+
+        return try await withCheckedThrowingContinuation { continuation in
+            healthStore.getRequestStatusForAuthorization(toShare: [], read: Self.readTypes) { status, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+                continuation.resume(returning: status)
+            }
+        }
+    }
+
+    func recentReadableDataTypes() async throws -> [String] {
+        let probes: [(HKSampleType, String)] = [
+            (HKObjectType.quantityType(forIdentifier: .stepCount)!, "steps"),
+            (HKObjectType.quantityType(forIdentifier: .distanceWalkingRunning)!, "distance"),
+            (HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!, "move energy"),
+            (HKObjectType.quantityType(forIdentifier: .appleExerciseTime)!, "exercise minutes"),
+            (HKObjectType.quantityType(forIdentifier: .heartRate)!, "heart rate"),
+            (HKObjectType.categoryType(forIdentifier: .sleepAnalysis)!, "sleep"),
+            (HKObjectType.workoutType(), "workouts"),
+        ]
+
+        var readableTypes: [String] = []
+        for (sampleType, label) in probes {
+            if try await hasRecentSamples(for: sampleType) {
+                readableTypes.append(label)
+            }
+        }
+        return readableTypes
+    }
+
+    private static let readTypes: Set<HKObjectType> = [
+        HKObjectType.activitySummaryType(),
+        HKObjectType.quantityType(forIdentifier: .stepCount)!,
+        HKObjectType.quantityType(forIdentifier: .distanceWalkingRunning)!,
+        HKObjectType.quantityType(forIdentifier: .flightsClimbed)!,
+        HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!,
+        HKObjectType.quantityType(forIdentifier: .appleExerciseTime)!,
+        HKObjectType.quantityType(forIdentifier: .heartRate)!,
+        HKObjectType.categoryType(forIdentifier: .appleStandHour)!,
+        HKObjectType.categoryType(forIdentifier: .sleepAnalysis)!,
+        HKObjectType.workoutType(),
+    ]
 
     func installObservers(onUpdate: @escaping @Sendable () async -> Void) {
         guard observerQueries.isEmpty else { return }
@@ -149,6 +185,10 @@ final class HealthKitStore {
                 sortDescriptors: [sort]
             ) { _, samples, error in
                 if let error {
+                    if Self.isNoDataError(error) {
+                        continuation.resume(returning: 0)
+                        return
+                    }
                     continuation.resume(throwing: error)
                     return
                 }
@@ -273,6 +313,10 @@ final class HealthKitStore {
                 options: .cumulativeSum
             ) { _, result, error in
                 if let error {
+                    if Self.isNoDataError(error) {
+                        continuation.resume(returning: 0)
+                        return
+                    }
                     continuation.resume(throwing: error)
                     return
                 }
@@ -291,6 +335,10 @@ final class HealthKitStore {
         return try await withCheckedThrowingContinuation { continuation in
             let query = HKActivitySummaryQuery(predicate: predicate) { _, summaries, error in
                 if let error {
+                    if Self.isNoDataError(error) {
+                        continuation.resume(returning: nil)
+                        return
+                    }
                     continuation.resume(throwing: error)
                     return
                 }
@@ -298,6 +346,39 @@ final class HealthKitStore {
             }
             healthStore.execute(query)
         }
+    }
+
+    private func hasRecentSamples(for sampleType: HKSampleType) async throws -> Bool {
+        let end = Date()
+        let start = Calendar.current.date(byAdding: .day, value: -30, to: end) ?? end
+        let predicate = HKQuery.predicateForSamples(withStart: start, end: end)
+
+        return try await withCheckedThrowingContinuation { continuation in
+            let query = HKSampleQuery(
+                sampleType: sampleType,
+                predicate: predicate,
+                limit: 1,
+                sortDescriptors: nil
+            ) { _, samples, error in
+                if let error {
+                    if Self.isNoDataError(error) {
+                        continuation.resume(returning: false)
+                        return
+                    }
+                    continuation.resume(throwing: error)
+                    return
+                }
+                continuation.resume(returning: !(samples?.isEmpty ?? true))
+            }
+            healthStore.execute(query)
+        }
+    }
+
+    private static func isNoDataError(_ error: Error) -> Bool {
+        guard let healthKitError = error as? HKError else {
+            return false
+        }
+        return healthKitError.code == .errorNoData
     }
 
     private func percent(current: Int, goal: Int) -> Int {
