@@ -37,9 +37,10 @@ struct HomeAssistantClient {
 
     func registerSensors(
         configuration: AppConfiguration,
-        snapshot: HealthSnapshot
+        snapshot: HealthSnapshot,
+        snapshotSource: HealthSnapshotSource
     ) async throws {
-        for payload in snapshot.registrationPayloads {
+        for payload in snapshot.registrationPayloads(snapshotSource: snapshotSource) {
             let envelope: [String: Any] = [
                 "type": "register_sensor",
                 "data": payload,
@@ -53,11 +54,12 @@ struct HomeAssistantClient {
 
     func updateSensors(
         configuration: AppConfiguration,
-        snapshot: HealthSnapshot
+        snapshot: HealthSnapshot,
+        snapshotSource: HealthSnapshotSource
     ) async throws {
         let envelope: [String: Any] = [
             "type": "update_sensor_states",
-            "data": snapshot.updatePayloads,
+            "data": snapshot.updatePayloads(snapshotSource: snapshotSource),
         ]
         _ = try await sendWebhook(configuration: configuration, jsonObject: envelope)
     }

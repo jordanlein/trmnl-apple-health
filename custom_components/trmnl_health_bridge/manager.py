@@ -6,7 +6,6 @@ import asyncio
 import hashlib
 import json
 import logging
-from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 
@@ -28,6 +27,7 @@ from .const import (
     DOMAIN,
     SUBSCRIPTION_TIERS,
 )
+from .payload import build_payload
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -152,7 +152,7 @@ class TRMNLHealthBridgeManager:
                     json=body,
                     headers={
                         "Content-Type": "application/json",
-                        "User-Agent": "home-assistant-trmnl-health-bridge/0.1.5",
+                        "User-Agent": "home-assistant-trmnl-health-bridge/0.2.0",
                     },
                     timeout=20,
                 ) as response:
@@ -210,47 +210,12 @@ class TRMNLHealthBridgeManager:
         attrs: dict[str, object],
     ) -> dict[str, object]:
         """Normalize the sensor attributes into a compact TRMNL payload."""
-        captured_at = attrs.get("captured_at", state)
-        return {
-            "profile_name": attrs.get("profile_name", self.context.name),
-            "device_name": attrs.get("device_name", self.context.name),
-            "captured_at": captured_at,
-            "sync_time_label": _format_local_time(captured_at),
-            "date_label": attrs.get("date_label", "Today"),
-            "rings": {
-                "move": _round_number(attrs.get("move_kcal")),
-                "move_goal": _round_number(attrs.get("move_goal_kcal")),
-                "move_percent": _round_number(attrs.get("move_percent")),
-                "exercise": _round_number(attrs.get("exercise_minutes")),
-                "exercise_goal": _round_number(attrs.get("exercise_goal_minutes")),
-                "exercise_percent": _round_number(attrs.get("exercise_percent")),
-                "stand": _round_number(attrs.get("stand_hours")),
-                "stand_goal": _round_number(attrs.get("stand_goal_hours")),
-                "stand_percent": _round_number(attrs.get("stand_percent")),
-            },
-            "activity": {
-                "steps": _round_number(attrs.get("steps")),
-                "distance_km": _round_number(attrs.get("distance_km"), 2),
-                "distance_mi": _round_number(attrs.get("distance_mi"), 2),
-                "flights_climbed": _round_number(attrs.get("flights_climbed")),
-            },
-            "health": {
-                "latest_heart_rate_bpm": _round_number(attrs.get("latest_heart_rate_bpm")),
-                "sleep_hours": _round_number(attrs.get("sleep_hours"), 1),
-                "latest_workout": attrs.get("latest_workout"),
-            },
-        }
-
-
-def _round_number(value: object, digits: int = 0) -> int | float:
-    """Convert Home Assistant state attributes into sane numeric output."""
-    try:
-        number = float(value)
-    except (TypeError, ValueError):
-        return 0 if digits == 0 else 0.0
-    if digits == 0:
-        return int(round(number))
-    return round(number, digits)
+        return build_payload(
+            state=state,
+            attrs=attrs,
+            default_name=self.context.name,
+            format_local_time=_format_local_time,
+        )
 
 
 def _format_local_time(value: object) -> str:

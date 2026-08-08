@@ -40,6 +40,8 @@ rate limits.
     "device_name": "Jordan's iPhone",
     "captured_at": "2026-05-30T16:22:00Z",
     "sync_time_label": "11:22 AM",
+    "date_label": "Sat, May 30",
+    "snapshot_status": "fresh",
     "rings": {
       "move": 428,
       "move_goal": 500,
@@ -79,7 +81,9 @@ The same snapshot also supports:
 - self-hosted bridge pairing and bearer-token snapshot updates
 
 These paths are retained for users who intentionally want a local hop. They
-are not required for the normal setup.
+are not required for the normal setup. Both optional paths preserve the
+snapshot's original timestamp and `fresh`/`cached` source status, so a locked
+phone fallback is labeled the same way as a direct webhook update.
 
 ## Source links
 

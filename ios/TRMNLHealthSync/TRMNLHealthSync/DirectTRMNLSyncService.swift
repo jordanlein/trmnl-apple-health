@@ -96,13 +96,15 @@ struct DestinationSyncService {
             if registerHomeAssistantSensors {
                 try await homeAssistantClient.registerSensors(
                     configuration: configuration,
-                    snapshot: snapshot
+                    snapshot: snapshot,
+                    snapshotSource: snapshotResult.source
                 )
             }
 
             try await homeAssistantClient.updateSensors(
                 configuration: configuration,
-                snapshot: snapshot
+                snapshot: snapshot,
+                snapshotSource: snapshotResult.source
             )
             outcome = .homeAssistantUpdate
 
@@ -120,6 +122,7 @@ struct DestinationSyncService {
                 serverURL: bridgeURL,
                 deviceToken: deviceToken,
                 snapshot: snapshot,
+                snapshotSource: snapshotResult.source,
                 trmnlWebhookURL: configuration.trmnlWebhookURLString
             )
 

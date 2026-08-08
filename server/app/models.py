@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict
 
@@ -71,13 +72,23 @@ class SnapshotPayload(BaseModel):
     latest_heart_rate_bpm: int = 0
     sleep_hours: float = 0
     latest_workout: LatestWorkoutPayload | None = None
+    snapshot_status: Literal["fresh", "cached"] = "fresh"
 
 
 class SnapshotUpdateRequest(BaseModel):
     """Payload wrapper for sync requests."""
 
     snapshot: SnapshotPayload
+    snapshot_status: Literal["fresh", "cached"] | None = None
     trmnl_webhook_url: str | None = None
+
+    def normalized_snapshot(self) -> SnapshotPayload:
+        """Apply an envelope source status while accepting older request shapes."""
+        return self.snapshot.model_copy(
+            update={
+                "snapshot_status": self.snapshot_status or self.snapshot.snapshot_status
+            }
+        )
 
 
 class SnapshotUpdateResponse(BaseModel):

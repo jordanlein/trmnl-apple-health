@@ -257,6 +257,8 @@ on your TRMNL display after the next refresh.
 - Opening the app and tapping `Sync Now` will always force a refresh.
 - In Home Assistant mode, the integration debounces updates to stay within TRMNL webhook limits.
 - In self-hosted mode, the bridge stores the latest snapshot locally and pushes it out to TRMNL.
+- Both optional bridge modes preserve the snapshot timestamp and cached/fresh
+  status used by locked-phone Shortcuts runs.
 
 ## Privacy model
 
