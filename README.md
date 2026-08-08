@@ -327,6 +327,15 @@ receiving updates through its TRMNL webhook URL. Use the `Webhook` strategy and
 paste only the `https://trmnl.com/api/custom_plugins/...` webhook URL into the
 app or bridge configuration.
 
+Also disconnect legacy TRMNL Companion Health sources, Shortcuts, or Health-export
+automations that post arrays of raw HealthKit samples to that webhook. Keep an
+automation that runs the app's `Sync Apple Health to TRMNL` action instead; it
+sends one compact daily snapshot and replaces legacy merge-variable keys.
+When the phone is locked, HealthKit may block fresh reads. The action may use a
+last-known snapshot maintained by the app and HealthKit background delivery.
+The TRMNL screen labels cached snapshots and always shows the original snapshot
+date and time, so an older fallback is never presented as current data.
+
 ### The iPhone app says the URL is invalid
 
 Use a full base URL when possible, for example:

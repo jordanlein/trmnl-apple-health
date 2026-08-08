@@ -90,7 +90,12 @@ final class HealthKitStore {
         ]
 
         for sampleType in sampleTypes {
-            let query = HKObserverQuery(sampleType: sampleType, predicate: nil) { _, completionHandler, _ in
+            let query = HKObserverQuery(sampleType: sampleType, predicate: nil) { _, completionHandler, error in
+                guard error == nil else {
+                    completionHandler()
+                    return
+                }
+
                 Task {
                     defer { completionHandler() }
                     await onUpdate()

@@ -143,7 +143,6 @@ class TRMNLHealthBridgeManager:
                 return True
 
             body = {
-                "merge_strategy": "deep_merge",
                 "merge_variables": payload,
             }
 

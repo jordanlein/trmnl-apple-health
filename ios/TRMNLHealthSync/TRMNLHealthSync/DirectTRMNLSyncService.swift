@@ -1,4 +1,5 @@
 import Foundation
+import HealthKit
 
 enum DestinationSyncOutcome {
     case directTRMNLPush
@@ -32,7 +33,7 @@ enum DestinationSyncOutcome {
     }
 }
 
-enum HealthSnapshotSource: Equatable {
+enum HealthSnapshotSource: String, Equatable {
     case fresh
     case cached
 }
@@ -82,7 +83,8 @@ struct DestinationSyncService {
 
             try await directTRMNLClient.updateSnapshot(
                 webhookURL: webhookURL,
-                snapshot: snapshot
+                snapshot: snapshot,
+                snapshotSource: snapshotResult.source
             )
             outcome = .directTRMNLPush
 
@@ -160,12 +162,19 @@ struct DestinationSyncService {
         } catch {
             guard
                 allowsCachedHealthSnapshot,
-                let cachedSnapshot = configuration.lastSnapshot,
-                Calendar.current.isDateInToday(cachedSnapshot.capturedAt)
+                Self.isHealthDatabaseInaccessible(error),
+                let cachedSnapshot = configuration.lastSnapshot
             else {
                 throw error
             }
             return (cachedSnapshot, .cached)
         }
+    }
+
+    private static func isHealthDatabaseInaccessible(_ error: Error) -> Bool {
+        guard let healthKitError = error as? HKError else {
+            return false
+        }
+        return healthKitError.code == .errorDatabaseInaccessible
     }
 }

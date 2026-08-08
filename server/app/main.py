@@ -191,7 +191,6 @@ def latest_snapshot(
     snapshot, stored_at = latest
     if format == "trmnl":
         return {
-            "merge_strategy": "deep_merge",
             "merge_variables": build_merge_variables(snapshot, settings.timezone_name),
         }
 

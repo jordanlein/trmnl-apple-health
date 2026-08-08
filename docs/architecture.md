@@ -35,7 +35,6 @@ rate limits.
 
 ```json
 {
-  "merge_strategy": "deep_merge",
   "merge_variables": {
     "profile_name": "Apple Health",
     "device_name": "Jordan's iPhone",
