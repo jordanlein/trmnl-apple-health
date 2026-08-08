@@ -27,7 +27,7 @@ final class AppModel: ObservableObject {
     private let selfHostedBridgeClient = SelfHostedBridgeClient()
     private let destinationSyncService = DestinationSyncService()
     private var observersInstalled = false
-    private var observerSyncTask: Task<Void, Never>?
+    private var observerSyncInProgress = false
     private var hasRegisteredSensors = false
 
     init() {
@@ -42,6 +42,13 @@ final class AppModel: ObservableObject {
             KeychainStore.load(.trmnlWebhookURL) ?? loaded.trmnlWebhookURLString
         deviceNameInput = loaded.deviceName
         lastSnapshot = loaded.lastSnapshot
+
+        // HealthKit can relaunch the app in the background to deliver observer
+        // updates. Install the queries during app construction so they are ready
+        // before a SwiftUI scene becomes active.
+        if hasSavedRegistration {
+            installObserversIfNeeded()
+        }
     }
 
     func bootstrap() async {
@@ -166,29 +173,23 @@ final class AppModel: ObservableObject {
         lastSnapshot = nil
         hasRegisteredSensors = false
         observersInstalled = false
-        observerSyncTask?.cancel()
-        observerSyncTask = nil
+        observerSyncInProgress = false
         KeychainStore.clearAll()
         AppConfigurationStore.clear()
         statusMessage = "Cleared local configuration."
         healthAccessStatusMessage = "Health access has not been checked yet."
     }
 
-    func scheduleObserverSync() {
-        observerSyncTask?.cancel()
-        let delaySeconds = observerSyncDelaySeconds
-        observerSyncTask = Task { [weak self] in
-            do {
-                try await Task.sleep(nanoseconds: UInt64(delaySeconds * 1_000_000_000))
-            } catch {
-                return
-            }
-            guard !Task.isCancelled else { return }
-            await self?.syncAfterObserverDelay()
+    private func syncFromHealthKitObserver() async {
+        guard hasSavedRegistration, !observerSyncInProgress else { return }
+        if let lastSuccessfulSync = configuration.lastSuccessfulSync,
+           Date().timeIntervalSince(lastSuccessfulSync) < minimumObserverSyncInterval {
+            return
         }
-    }
 
-    private func syncAfterObserverDelay() async {
+        observerSyncInProgress = true
+        defer { observerSyncInProgress = false }
+
         do {
             try await syncNow(reason: "healthkit")
         } catch {
@@ -215,7 +216,7 @@ final class AppModel: ObservableObject {
         guard !observersInstalled else { return }
         observersInstalled = true
         healthKitStore.installObservers { [weak self] in
-            await self?.scheduleObserverSync()
+            await self?.syncFromHealthKitObserver()
         }
     }
 
@@ -353,13 +354,7 @@ final class AppModel: ObservableObject {
         }
     }
 
-    private var observerSyncDelaySeconds: Double {
-        guard configuration.syncDestination == .directTRMNL else {
-            return 15
-        }
-        guard let lastSuccessfulSync = configuration.lastSuccessfulSync else {
-            return 15
-        }
-        return max(15, 300 - Date().timeIntervalSince(lastSuccessfulSync))
+    private var minimumObserverSyncInterval: TimeInterval {
+        configuration.syncDestination == .directTRMNL ? 300 : 15
     }
 }

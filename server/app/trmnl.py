@@ -66,7 +66,6 @@ def push_to_trmnl(
     """Push one payload update to a TRMNL webhook endpoint."""
     body = json.dumps(
         {
-            "merge_strategy": "deep_merge",
             "merge_variables": merge_variables,
         }
     ).encode("utf-8")

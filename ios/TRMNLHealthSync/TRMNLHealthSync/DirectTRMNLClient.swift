@@ -51,13 +51,24 @@ extension Error {
 struct DirectTRMNLClient {
     private let session = URLSession.trmnlSync
 
-    func updateSnapshot(webhookURL: URL, snapshot: HealthSnapshot) async throws {
-        let payload = TRMNLWebhookRequest(mergeVariables: snapshot.trmnlMergeVariables)
+    func updateSnapshot(
+        webhookURL: URL,
+        snapshot: HealthSnapshot,
+        snapshotSource: HealthSnapshotSource
+    ) async throws {
+        let payload = TRMNLWebhookRequest(
+            mergeVariables: snapshot.trmnlMergeVariables(snapshotSource: snapshotSource)
+        )
+        let body = try JSONEncoder.trmnlHealthAPI.encode(payload)
+        guard body.count < 2_048 else {
+            throw AppModelError.trmnlPayloadTooLarge(body.count)
+        }
+
         var request = URLRequest(url: webhookURL)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("trmnl-health-sync-ios/0.3.0", forHTTPHeaderField: "User-Agent")
-        request.httpBody = try JSONEncoder.trmnlHealthAPI.encode(payload)
+        request.httpBody = body
 
         let (data, response) = try await session.trmnlData(for: request)
         try validate(response: response, data: data)
@@ -81,5 +92,4 @@ struct DirectTRMNLClient {
 
 private struct TRMNLWebhookRequest: Encodable {
     let mergeVariables: TRMNLMergeVariables
-    let mergeStrategy = "deep_merge"
 }

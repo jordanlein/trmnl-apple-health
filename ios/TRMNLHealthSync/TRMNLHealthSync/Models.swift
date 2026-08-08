@@ -315,13 +315,14 @@ struct HealthSnapshot: Codable, Equatable {
         }
     }
 
-    var trmnlMergeVariables: TRMNLMergeVariables {
+    func trmnlMergeVariables(snapshotSource: HealthSnapshotSource) -> TRMNLMergeVariables {
         TRMNLMergeVariables(
             profileName: profileName,
             deviceName: deviceName,
             capturedAt: capturedAtISO8601,
             syncTimeLabel: capturedAt.formatted(date: .omitted, time: .shortened),
             dateLabel: dateLabel,
+            snapshotStatus: snapshotSource.rawValue,
             rings: TRMNLRings(
                 move: moveKilocalories,
                 moveGoal: moveGoalKilocalories,
@@ -382,6 +383,7 @@ struct TRMNLMergeVariables: Encodable {
     let capturedAt: String
     let syncTimeLabel: String
     let dateLabel: String
+    let snapshotStatus: String
     let rings: TRMNLRings
     let activity: TRMNLActivity
     let health: TRMNLHealth
@@ -464,6 +466,7 @@ enum AppModelError: LocalizedError {
     case missingBridgeSetupToken
     case missingBridgeRegistration
     case healthDataUnavailable
+    case trmnlPayloadTooLarge(Int)
     case trmnlPushFailed(String)
 
     var errorDescription: String? {
@@ -486,6 +489,8 @@ enum AppModelError: LocalizedError {
             return "The app is not paired with the self-hosted bridge yet."
         case .healthDataUnavailable:
             return "Health data is not available on this device."
+        case .trmnlPayloadTooLarge(let byteCount):
+            return "The compact TRMNL update was unexpectedly \(byteCount) bytes, so the app stopped before sending it. TRMNL webhook updates must remain below 2 KB."
         case .trmnlPushFailed(let message):
             let trimmed = message.trimmingCharacters(in: .whitespacesAndNewlines)
             let summary = trimmed.count > 220 ? String(trimmed.prefix(220)) + "..." : trimmed

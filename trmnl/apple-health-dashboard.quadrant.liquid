@@ -1,37 +1,52 @@
 {% assign steps_today = activity.steps | default: 0 | plus: 0 %}
+{% assign sleep_today = health.sleep_hours | default: 0 | plus: 0 %}
+{% assign latest_heart_rate = health.latest_heart_rate_bpm | default: 0 | plus: 0 %}
 {% assign move_percent_raw = rings.move_percent | default: 0 | plus: 0 %}
 {% assign exercise_percent_raw = rings.exercise_percent | default: 0 | plus: 0 %}
 {% assign stand_percent_raw = rings.stand_percent | default: 0 | plus: 0 %}
 {% assign move_progress = move_percent_raw %}{% if move_progress < 0 %}{% assign move_progress = 0 %}{% endif %}{% if move_progress > 100 %}{% assign move_progress = 100 %}{% endif %}
 {% assign exercise_progress = exercise_percent_raw %}{% if exercise_progress < 0 %}{% assign exercise_progress = 0 %}{% endif %}{% if exercise_progress > 100 %}{% assign exercise_progress = 100 %}{% endif %}
 {% assign stand_progress = stand_percent_raw %}{% if stand_progress < 0 %}{% assign stand_progress = 0 %}{% endif %}{% if stand_progress > 100 %}{% assign stand_progress = 100 %}{% endif %}
-{% assign move_remaining = 100 | minus: move_progress %}
-{% assign exercise_remaining = 100 | minus: exercise_progress %}
-{% assign stand_remaining = 100 | minus: stand_progress %}
+{% assign move_extra = move_percent_raw | minus: 100 %}{% if move_extra < 0 %}{% assign move_extra = 0 %}{% endif %}{% if move_extra > 100 %}{% assign move_extra = 100 %}{% endif %}
+{% assign exercise_extra = exercise_percent_raw | minus: 100 %}{% if exercise_extra < 0 %}{% assign exercise_extra = 0 %}{% endif %}{% if exercise_extra > 100 %}{% assign exercise_extra = 100 %}{% endif %}
+{% assign stand_extra = stand_percent_raw | minus: 100 %}{% if stand_extra < 0 %}{% assign stand_extra = 0 %}{% endif %}{% if stand_extra > 100 %}{% assign stand_extra = 100 %}{% endif %}
+{% assign move_remaining = 100 | minus: move_progress %}{% assign exercise_remaining = 100 | minus: exercise_progress %}{% assign stand_remaining = 100 | minus: stand_progress %}
+{% assign move_extra_remaining = 100 | minus: move_extra %}{% assign exercise_extra_remaining = 100 | minus: exercise_extra %}{% assign stand_extra_remaining = 100 | minus: stand_extra %}
 {% assign move_offset = 509 | times: move_remaining | divided_by: 100 %}
 {% assign exercise_offset = 358 | times: exercise_remaining | divided_by: 100 %}
 {% assign stand_offset = 207 | times: stand_remaining | divided_by: 100 %}
+{% assign move_extra_offset = 509 | times: move_extra_remaining | divided_by: 100 %}
+{% assign exercise_extra_offset = 358 | times: exercise_extra_remaining | divided_by: 100 %}
+{% assign stand_extra_offset = 207 | times: stand_extra_remaining | divided_by: 100 %}
 
-<div class="layout layout--col">
+<div class="layout layout--col gap--xsmall">
   <table width="100%" cellpadding="0" cellspacing="0">
-    <tr><td><h1>Apple Health</h1></td><td align="right">{{ 'now' | date: "%a, %b %-d" }}</td></tr>
+    <tr><td><h1>Apple Health</h1></td><td align="right">{% if snapshot_status == "cached" %}<span class="label label--small label--outline">Cached</span>{% else %}<span class="label label--small">As of</span>{% endif %} {{ date_label | default: "Waiting" }}{% if sync_time_label %} · {{ sync_time_label }}{% endif %}</td></tr>
   </table>
+  <div class="divider"></div>
   <table width="100%" cellpadding="0" cellspacing="0">
     <tr>
-      <td width="138" align="center">
-        <svg width="124" height="124" viewBox="0 0 240 240" role="img" aria-label="Apple Health activity rings">
-          <circle cx="120" cy="120" r="81" fill="none" stroke="#f0f0e9" stroke-width="24"></circle><circle cx="120" cy="120" r="57" fill="none" stroke="#f0f0e9" stroke-width="24"></circle><circle cx="120" cy="120" r="33" fill="none" stroke="#f0f0e9" stroke-width="22"></circle>
-          <circle cx="120" cy="120" r="81" fill="none" stroke="#111111" stroke-width="16" stroke-linecap="round" stroke-dasharray="509" stroke-dashoffset="{{ move_offset }}" transform="rotate(-90 120 120)"></circle><circle cx="120" cy="120" r="57" fill="none" stroke="#565656" stroke-width="16" stroke-linecap="round" stroke-dasharray="358" stroke-dashoffset="{{ exercise_offset }}" transform="rotate(-90 120 120)"></circle><circle cx="120" cy="120" r="33" fill="none" stroke="#919191" stroke-width="14" stroke-linecap="round" stroke-dasharray="207" stroke-dashoffset="{{ stand_offset }}" transform="rotate(-90 120 120)"></circle>
+      <td width="132" align="center">
+        <svg width="116" height="116" viewBox="0 0 240 240" role="img" aria-label="Activity rings; white inner arcs show progress above goal">
+          <circle cx="120" cy="120" r="81" fill="none" stroke="#deded8" stroke-width="22"></circle><circle cx="120" cy="120" r="57" fill="none" stroke="#deded8" stroke-width="22"></circle><circle cx="120" cy="120" r="33" fill="none" stroke="#deded8" stroke-width="20"></circle>
+          <circle cx="120" cy="120" r="81" fill="none" stroke="#111" stroke-width="16" stroke-linecap="butt" stroke-dasharray="509" stroke-dashoffset="{{ move_offset }}" transform="rotate(-90 120 120)"></circle><circle cx="120" cy="120" r="57" fill="none" stroke="#555" stroke-width="16" stroke-linecap="butt" stroke-dasharray="358" stroke-dashoffset="{{ exercise_offset }}" transform="rotate(-90 120 120)"></circle><circle cx="120" cy="120" r="33" fill="none" stroke="#8b8b8b" stroke-width="14" stroke-linecap="butt" stroke-dasharray="207" stroke-dashoffset="{{ stand_offset }}" transform="rotate(-90 120 120)"></circle>
+          <path d="M 120 31 A 8 8 0 0 1 120 47 Z" fill="#111"></path><path d="M 120 55 A 8 8 0 0 1 120 71 Z" fill="#555"></path><path d="M 120 80 A 7 7 0 0 1 120 94 Z" fill="#8b8b8b"></path>
+          {% if move_percent_raw > 100 %}<circle cx="120" cy="120" r="81" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-dasharray="509" stroke-dashoffset="{{ move_extra_offset }}" transform="rotate(-90 120 120)"></circle>{% endif %}{% if exercise_percent_raw > 100 %}<circle cx="120" cy="120" r="57" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-dasharray="358" stroke-dashoffset="{{ exercise_extra_offset }}" transform="rotate(-90 120 120)"></circle>{% endif %}{% if stand_percent_raw > 100 %}<circle cx="120" cy="120" r="33" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-dasharray="207" stroke-dashoffset="{{ stand_extra_offset }}" transform="rotate(-90 120 120)"></circle>{% endif %}
+          <line x1="120" y1="31" x2="120" y2="47" stroke="#fff" stroke-width="3"></line><line x1="120" y1="55" x2="120" y2="71" stroke="#fff" stroke-width="3"></line><line x1="120" y1="79" x2="120" y2="93" stroke="#fff" stroke-width="3"></line>
         </svg>
       </td>
-      <td>
+      <td valign="middle">
         <table width="100%" cellpadding="2" cellspacing="0">
-          <tr><td>Move</td><td align="right"><strong>{{ move_percent_raw }}%</strong></td></tr>
-          <tr><td>Exercise</td><td align="right"><strong>{{ exercise_percent_raw }}%</strong></td></tr>
-          <tr><td>Stand</td><td align="right"><strong>{{ stand_percent_raw }}%</strong></td></tr>
+          <tr><td class="label">Move</td><td align="right"><strong>{{ move_percent_raw }}%</strong></td></tr>
+          <tr><td class="label">Exercise</td><td align="right"><strong>{{ exercise_percent_raw }}%</strong></td></tr>
+          <tr><td class="label">Stand</td><td align="right"><strong>{{ stand_percent_raw }}%</strong></td></tr>
           <tr><td class="label">Steps</td><td align="right"><strong>{{ steps_today | round }}</strong></td></tr>
         </table>
       </td>
     </tr>
+  </table>
+  <table width="100%" cellpadding="1" cellspacing="0">
+    <tr><td class="label label--small">Heart</td><td align="right"><strong>{{ latest_heart_rate | round }}</strong></td><td width="22"></td><td class="label label--small">Sleep</td><td align="right"><strong>{{ sleep_today | round: 1 }}h</strong></td></tr>
+    <tr><td class="label label--small">Distance</td><td align="right"><strong>{{ activity.distance_mi | default: 0 }}mi</strong></td><td width="22"></td><td class="label label--small">Flights</td><td align="right"><strong>{{ activity.flights_climbed | default: 0 }}</strong></td></tr>
   </table>
 </div>

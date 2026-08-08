@@ -57,7 +57,7 @@
 		AA8E76C3B0D9FC8C0392F04B /* ActivityDashboardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ActivityDashboardView.swift; path = TRMNLHealthSync/ActivityDashboardView.swift; sourceTree = "<group>"; };
 		DE0AC00A1E170FE02513923E /* TRMNLHealthSync.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TRMNLHealthSync.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E7140DAF0B6EEC016F674C07 /* TRMNLHealthSyncApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TRMNLHealthSyncApp.swift; path = TRMNLHealthSync/TRMNLHealthSyncApp.swift; sourceTree = "<group>"; };
-		F385059A77F87F25F89A0AC0 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = TRMNLHealthSync/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		F385059A77F87F25F89A0AC0 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = TRMNLHealthSync/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		F4267A5E22443E481F746782 /* SetupContent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SetupContent.swift; path = TRMNLHealthSync/SetupContent.swift; sourceTree = "<group>"; };
 		FF133DE5A1DB881FC01902E2 /* KeychainStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = KeychainStore.swift; path = TRMNLHealthSync/KeychainStore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -176,6 +176,12 @@
 			attributes = {
 				LastSwiftUpdateCheck = 1600;
 				LastUpgradeCheck = 1650;
+				TargetAttributes = {
+					5B7EE93BD053B8869AD5E9B8 = {
+						DevelopmentTeam = XKMX8H946G;
+						ProvisioningStyle = Automatic;
+					};
+				};
 			};
 			buildConfigurationList = 8E13A792D9DB2FD2DEC3B87A /* Build configuration list for PBXProject "TRMNLHealthSync" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -186,8 +192,6 @@
 				Base,
 			);
 			mainGroup = 4DE903309BE23FA43AC33560;
-			minimizedProjectReferenceProxies = 0;
-			preferredProjectObjectVersion = 77;
 			productRefGroup = E2D91E7D4F4EF6BD0721960A /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -247,11 +251,12 @@
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_ENTITLEMENTS = TRMNLHealthSync/TRMNLHealthSync.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = XKMX8H946G;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "TRMNL Health Sync";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "TRMNL Health Sync reads your Apple Health activity data to mirror daily rings on your TRMNL display through your selected destination.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "TRMNL Health Sync does not add, change, or delete Apple Health data. HealthKit access is used only to read the activity data you choose to share.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
@@ -277,11 +282,12 @@
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_ENTITLEMENTS = TRMNLHealthSync/TRMNLHealthSync.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = XKMX8H946G;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "TRMNL Health Sync";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "TRMNL Health Sync reads your Apple Health activity data to mirror daily rings on your TRMNL display through your selected destination.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "TRMNL Health Sync does not add, change, or delete Apple Health data. HealthKit access is used only to read the activity data you choose to share.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
@@ -409,8 +415,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;

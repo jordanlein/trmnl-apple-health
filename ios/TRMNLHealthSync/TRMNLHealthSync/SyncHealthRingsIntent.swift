@@ -1,4 +1,6 @@
 import AppIntents
+import HealthKit
+import Network
 
 struct SyncHealthRingsToTRMNLIntent: AppIntent {
     static let title: LocalizedStringResource = "Sync Apple Health to TRMNL"
@@ -9,26 +11,86 @@ struct SyncHealthRingsToTRMNLIntent: AppIntent {
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
         do {
-            let result = try await DestinationSyncService().sync(
-                allowsCachedHealthSnapshot: true
-            )
+            let configuration = AppConfigurationStore.load()
+            if let localURL = configuration.activeLocalNetworkURL,
+               await ShortcutNetworkPreflight.shouldSkipLocalNetworkURL() {
+                return .result(
+                    dialog: "\(ShortcutSyncFailure.dialogForUnavailableLocalNetworkURL(localURL, configuration: configuration))"
+                )
+            }
+
+            let result = try await withShortcutDeadline {
+                try await DestinationSyncService().sync(
+                    allowsCachedHealthSnapshot: true
+                )
+            }
             let snapshot = result.snapshot
             let cacheNote =
                 result.snapshotSource == .cached
-                ? " Used cached Health data from \(snapshot.capturedAt.formatted(date: .omitted, time: .shortened))."
+                ? " Used cached Health data from \(cachedSnapshotDateLabel(snapshot.capturedAt))."
                 : ""
 
             return .result(
                 dialog: "Synced Apple Health via \(result.outcome.dialogLabel): Move \(snapshot.movePercent)%, Exercise \(snapshot.exercisePercent)%, Stand \(snapshot.standPercent)%.\(cacheNote)"
             )
         } catch {
-            let configuration = AppConfigurationStore.load()
-            let message = ShortcutSyncFailure.dialog(
-                for: error,
-                configuration: configuration
-            )
+            let message = ShortcutSyncFailure.dialog(for: error)
             return .result(dialog: "\(message)")
         }
+    }
+}
+
+private func cachedSnapshotDateLabel(_ date: Date) -> String {
+    let dateStyle: Date.FormatStyle.DateStyle = Calendar.current.isDateInToday(date) ? .omitted : .abbreviated
+    return date.formatted(date: dateStyle, time: .shortened)
+}
+
+private func withShortcutDeadline<T>(
+    seconds: UInt64 = 22,
+    operation: @Sendable @escaping () async throws -> T
+) async throws -> T {
+    try await withThrowingTaskGroup(of: T.self) { group in
+        group.addTask {
+            try await operation()
+        }
+        group.addTask {
+            try await Task.sleep(nanoseconds: seconds * 1_000_000_000)
+            throw ShortcutSyncTimeout()
+        }
+
+        defer { group.cancelAll() }
+        guard let result = try await group.next() else {
+            throw ShortcutSyncTimeout()
+        }
+        return result
+    }
+}
+
+private struct ShortcutSyncTimeout: LocalizedError {
+    var errorDescription: String? {
+        "The sync took too long for this Shortcuts automation. Unlock the iPhone and run it again. If this keeps happening, confirm the destination is reachable from this iPhone."
+    }
+}
+
+private enum ShortcutNetworkPreflight {
+    static func shouldSkipLocalNetworkURL() async -> Bool {
+        guard let path = await currentPath(), path.status == .satisfied else {
+            return false
+        }
+
+        return path.usesInterfaceType(.cellular)
+            && !path.usesInterfaceType(.wifi)
+            && !path.usesInterfaceType(.other)
+    }
+
+    private static func currentPath() async -> NWPath? {
+        let monitor = NWPathMonitor()
+        let queue = DispatchQueue(label: "TRMNLHealthSync.ShortcutNetworkPreflight")
+        monitor.start(queue: queue)
+        try? await Task.sleep(nanoseconds: 250_000_000)
+        let path = monitor.currentPath
+        monitor.cancel()
+        return path
     }
 }
 
@@ -47,7 +109,16 @@ struct TRMNLHealthShortcuts: AppShortcutsProvider {
 }
 
 private enum ShortcutSyncFailure {
-    static func dialog(for error: Error, configuration: AppConfiguration) -> String {
+    static func dialogForUnavailableLocalNetworkURL(
+        _ localURL: URL,
+        configuration: AppConfiguration
+    ) -> String {
+        let host = localURL.host ?? localURL.absoluteString
+        return "Could not sync Apple Health via \(configuration.syncDestination.displayName). The configured address (\(host)) is a local network address, and this iPhone is currently using cellular data. Connect to home Wi-Fi, turn on your VPN, use a Home Assistant remote URL or Home Assistant Cloud, switch to TRMNL Direct, or use a reachable bridge URL."
+    }
+
+    static func dialog(for error: Error) -> String {
+        let configuration = AppConfigurationStore.load()
         var message = "Could not sync Apple Health via \(configuration.syncDestination.displayName). "
         message += explanation(for: error)
 
@@ -63,6 +134,21 @@ private enum ShortcutSyncFailure {
         if let appError = error as? AppModelError,
            let description = appError.errorDescription {
             return description
+        }
+
+        if let healthKitError = error as? HKError {
+            switch healthKitError.code {
+            case .errorDatabaseInaccessible:
+                return "Health data is encrypted while the iPhone is locked, and there is no cached snapshot available yet. Unlock the phone and run the Shortcut once; later locked runs can publish that last known snapshot with its original date and time."
+            case .errorAuthorizationNotDetermined:
+                return "Health access has not been approved yet. Open the app and review Health permissions first."
+            case .errorHealthDataRestricted:
+                return "Health data is restricted on this iPhone."
+            case .errorHealthDataUnavailable:
+                return "Health data is not available on this device."
+            default:
+                return healthKitError.localizedDescription
+            }
         }
 
         if let urlError = error as? URLError {
@@ -93,6 +179,7 @@ private enum ShortcutSyncFailure {
             : description
     }
 }
+
 
 private extension AppConfiguration {
     var activeLocalNetworkURL: URL? {
