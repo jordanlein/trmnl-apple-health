@@ -23,6 +23,7 @@ def build_merge_variables(
         "captured_at": _iso8601(captured_at),
         "sync_time_label": _format_time(localized),
         "date_label": _format_date(localized),
+        "snapshot_status": snapshot.snapshot_status,
         "rings": {
             "move": snapshot.move_kilocalories,
             "move_goal": snapshot.move_goal_kilocalories,
@@ -75,7 +76,7 @@ def push_to_trmnl(
         method="POST",
         headers={
             "Content-Type": "application/json",
-            "User-Agent": "trmnl-health-standalone/0.2.0",
+            "User-Agent": "trmnl-health-standalone/0.3.0",
         },
     )
 

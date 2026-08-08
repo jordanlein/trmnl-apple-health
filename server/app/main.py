@@ -25,7 +25,7 @@ storage = Storage(settings.database_path)
 
 app = FastAPI(
     title="TRMNL Health Bridge",
-    version="0.2.0",
+    version="0.3.0",
     summary="Self-hosted bridge for syncing Apple Health snapshots to TRMNL.",
 )
 
@@ -133,6 +133,7 @@ def update_snapshot(
 ) -> SnapshotUpdateResponse:
     """Store the latest Health snapshot and optionally push it to TRMNL."""
     stored_at = datetime.now(tz=UTC)
+    snapshot = payload.normalized_snapshot()
     effective_webhook = (
         payload.trmnl_webhook_url
         or device["trmnl_webhook_url"]
@@ -140,7 +141,7 @@ def update_snapshot(
     )
     storage.save_snapshot(
         device_id=device["device_id"],
-        snapshot=payload.snapshot,
+        snapshot=snapshot,
         trmnl_webhook_url=payload.trmnl_webhook_url,
         stored_at=stored_at,
     )
@@ -150,7 +151,7 @@ def update_snapshot(
     if effective_webhook:
         pushed_to_trmnl, push_error = push_to_trmnl(
             effective_webhook,
-            build_merge_variables(payload.snapshot, settings.timezone_name),
+            build_merge_variables(snapshot, settings.timezone_name),
         )
 
     return SnapshotUpdateResponse(
@@ -214,6 +215,7 @@ def _render_dashboard(settings: Settings, devices: list[DeviceSummary]) -> str:
                 f"<p>{snapshot.move_kilocalories}/{snapshot.move_goal_kilocalories} kcal move</p>"
                 f"<p>{snapshot.exercise_minutes}/{snapshot.exercise_goal_minutes} min exercise</p>"
                 f"<p>{snapshot.stand_hours}/{snapshot.stand_goal_hours} hr stand</p>"
+                f"<p>Snapshot source: {snapshot.snapshot_status}</p>"
             )
         cards.append(
             f"""

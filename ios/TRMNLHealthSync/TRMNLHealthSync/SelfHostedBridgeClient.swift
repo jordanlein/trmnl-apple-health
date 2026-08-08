@@ -35,10 +35,12 @@ struct SelfHostedBridgeClient {
         serverURL: URL,
         deviceToken: String,
         snapshot: HealthSnapshot,
+        snapshotSource: HealthSnapshotSource,
         trmnlWebhookURL: String?
     ) async throws -> SelfHostedBridgeSyncResponse {
         let payload = SelfHostedBridgeSnapshotRequest(
             snapshot: snapshot,
+            snapshotStatus: snapshotSource.rawValue,
             trmnlWebhookURL: normalizedWebhook(trmnlWebhookURL)
         )
 

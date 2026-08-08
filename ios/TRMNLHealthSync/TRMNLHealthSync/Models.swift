@@ -200,10 +200,11 @@ struct HealthSnapshot: Codable, Equatable {
         return formatter.string(from: capturedAt)
     }
 
-    var snapshotAttributes: [String: Any] {
+    func snapshotAttributes(snapshotSource: HealthSnapshotSource) -> [String: Any] {
         var attributes: [String: Any] = [
             "captured_at": capturedAtISO8601,
             "date_label": dateLabel,
+            "snapshot_status": snapshotSource.rawValue,
             "device_name": deviceName,
             "profile_name": profileName,
             "steps": steps,
@@ -228,7 +229,7 @@ struct HealthSnapshot: Codable, Equatable {
         return attributes
     }
 
-    var registrationPayloads: [[String: Any]] {
+    func registrationPayloads(snapshotSource: HealthSnapshotSource) -> [[String: Any]] {
         [
             [
                 "type": "sensor",
@@ -236,7 +237,7 @@ struct HealthSnapshot: Codable, Equatable {
                 "name": "Health Snapshot",
                 "state": capturedAtISO8601,
                 "icon": "mdi:heart-pulse",
-                "attributes": snapshotAttributes,
+                "attributes": snapshotAttributes(snapshotSource: snapshotSource),
             ],
             [
                 "type": "sensor",
@@ -303,8 +304,8 @@ struct HealthSnapshot: Codable, Equatable {
         ]
     }
 
-    var updatePayloads: [[String: Any]] {
-        registrationPayloads.map { payload in
+    func updatePayloads(snapshotSource: HealthSnapshotSource) -> [[String: Any]] {
+        registrationPayloads(snapshotSource: snapshotSource).map { payload in
             [
                 "type": payload["type"] as Any,
                 "unique_id": payload["unique_id"] as Any,
@@ -372,7 +373,7 @@ struct LatestWorkout: Codable, Equatable {
             "activity_type": activityType,
             "start_date": ISO8601DateFormatter().string(from: startDate),
             "duration_seconds": Int(durationSeconds.rounded()),
-            "total_energy_burned_kcal": Int(totalEnergyBurnedKilocalories.rounded()),
+            "total_energy_burned_kilocalories": Int(totalEnergyBurnedKilocalories.rounded()),
         ]
     }
 }
@@ -430,10 +431,12 @@ struct TRMNLActivity: Encodable {
 
 struct SelfHostedBridgeSnapshotRequest: Encodable {
     let snapshot: HealthSnapshot
+    let snapshotStatus: String
     let trmnlWebhookURL: String?
 
     enum CodingKeys: String, CodingKey {
         case snapshot
+        case snapshotStatus = "snapshot_status"
         case trmnlWebhookURL = "trmnl_webhook_url"
     }
 }
